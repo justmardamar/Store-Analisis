@@ -13,14 +13,47 @@ from flask import (
 )
 from flask_cors import CORS
 from config import SECRET_KEY
+from common.connection import get_connection
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 CORS(app)
 
-@app.route('/api/data', methods=['GET'])
-def get_data():
-    return jsonify({"message": "Hello from the Flask backend!","status":"success"})
+conn = get_connection()
+cursor = conn.cursor()
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+
+    cursor.execute(
+        "SELECT * FROM users WHERE name = "+ "'"+ username +"'"+ " AND password = "+ "'"+ password + "'"
+    )
+    user = cursor.fetchone()
+
+    if user:
+        session['user_id'] = user[0]
+        session['username'] = user[1]
+        session['role'] = user[4]
+        return jsonify({"message": "Login success"})
+
+    else:
+        return jsonify({"message": "Login failed"})
+
+@app.route('/api/store/create',methods=['POST'])
+def create_store():
+    data = request.get_json()
+    name = data.get('name')
+    address = data.get('address')
+    cursor.execute(
+        "INSERT INTO stores (name, address) VALUES ("+ "'"+ name +"'"+ " AND password = "+ "'"+ address + "'"
+    )
+    conn.commit()
+    return jsonify({"message": "Store created successfully"})
+    
+
 
 if __name__ == '__main__':
     app.run(debug=True)
