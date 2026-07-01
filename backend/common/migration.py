@@ -132,8 +132,8 @@ def create_table_users():
             name varchar(100) not null,
             email varchar(100) not null UNIQUE,
             password varchar(255) not null,
-            role varchar(20) CHECK (role IN ('admin', 'stock','pos')),
-            store_id int REFERENCES stores(id) ON DELETE CASCADE,
+            role varchar(20) CHECK (role IN ('Super Admin','Admin','kasir','Stok')),
+            store_id int REFERENCES stores(id) ON DELETE CASCADE default Null,
             created_at timestamp default current_timestamp,
             updated_at timestamp default current_timestamp
         )
@@ -151,6 +151,8 @@ def create_table_users():
 # create_table_orders()
 # create_table_detail_order()
 # create_table_transactions()
+
+# create_table_users()
 
 create_table_users()
 

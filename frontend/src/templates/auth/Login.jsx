@@ -3,7 +3,7 @@ import axios from "axios"
 
 export default function Login(){
     const [login,setLoginData] = useState({
-        username: "",
+        email: "",
         password: "",
     })
     const handleInputChange = (e) => {
@@ -13,7 +13,8 @@ export default function Login(){
             [name]:value,
         })
     }
-    const  handleLogin = async () =>{
+    const handleLogin = async (e) =>{
+        e.preventDefault()
         const res = await axios.post("http://localhost:5000/api/login",login)
         if(res.data.message){
             console.log("Login success")
@@ -24,9 +25,9 @@ export default function Login(){
 
     return (
         <>
-            <form action="">
-                <label htmlFor="">Username</label>
-                <input type="text" name="username" onChange={handleInputChange} />
+            <form onSubmit={handleLogin}>
+                <label htmlFor="">Email</label>
+                <input type="text" name="email" onChange={handleInputChange} />
 
                 <label htmlFor="">Password</label>
                 <input type="password" name="password" onChange={handleInputChange} />
