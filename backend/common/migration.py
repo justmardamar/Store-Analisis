@@ -92,21 +92,10 @@ def create_table_reports():
     """)
     conn.commit()
 
-def create_table_orders():
+def create_table_detail_transaction():
     cursor.execute("""
-        CREATE TABLE orders(
-            id SERIAL PRIMARY KEY,
-            store_id int REFERENCES stores(id) ON DELETE CASCADE,
-            total_price numeric(12,2) not null,
-            created_at timestamp default current_timestamp
-        )
-    """)
-    conn.commit()
-
-def create_table_detail_order():
-    cursor.execute("""
-        CREATE TABLE detail_order(
-            order_id int REFERENCES orders(id) ON DELETE CASCADE,
+        CREATE TABLE detail_transaction(
+            transaction_id int REFERENCES transactions(id) ON DELETE CASCADE,
             product_id int REFERENCES products(id) ON DELETE CASCADE,
             quantity int not null,
             total numeric(12,2) not null
@@ -118,7 +107,11 @@ def create_table_transactions():
     cursor.execute("""
         CREATE TABLE transactions(
             id SERIAL PRIMARY KEY,
-            order_id int REFERENCES orders(id) ON DELETE CASCADE UNIQUE,
+            store_id int REFERENCES stores(id) ON DELETE CASCADE UNIQUE,
+            total_price numeric(12,2) not null,
+            amount_paid numeric(12,2) not null,
+            change numeric(12,2) not null,
+            status varchar(20) CHECK (status IN ('Selesai', 'Pending')),
             payment_method varchar(20) CHECK (payment_method IN ('Tunai', 'Qris')),
             created_at timestamp default current_timestamp
         )
@@ -148,12 +141,9 @@ def create_table_users():
 # create_table_warehouse()
 # create_table_stocks()
 # create_table_reports()
-# create_table_orders()
-# create_table_detail_order()
-# create_table_transactions()
+create_table_transactions()
+create_table_detail_transaction()
 
 # create_table_users()
-
-create_table_users()
 
 conn.close()

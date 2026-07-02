@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 
 export default function CreateUser(){
     const [user,setUser] = useState({
@@ -9,6 +9,8 @@ export default function CreateUser(){
         role : ""
     })
 
+    const [stores, setStores] = useState([])
+
     const handleInputChange = (e) => {
         const {name, value} = e.target
         setUser({
@@ -16,6 +18,14 @@ export default function CreateUser(){
             [name] : value
         })
     }
+
+    const getStores = async () => {
+        const response = await axios.get('http://localhost:5000/api/store')
+        if(response.status === 200){
+            setStores(response.data.stores)
+        }
+    }
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -26,10 +36,13 @@ export default function CreateUser(){
                 name : "",
                 email : "",
                 password : "",
-                role : ""
             })
         }
     }
+
+    useEffect(() => {
+        getStores()
+    },[])
 
     return(
         <form onSubmit={handleSubmit}>
@@ -39,11 +52,13 @@ export default function CreateUser(){
             <input type="text" name="email" placeholder="Masukkan Email" onChange={handleInputChange}/>
             <label htmlFor="password">Password</label>
             <input type="text" name="password" placeholder="Masukkan Password" onChange={handleInputChange}/>
-            <label htmlFor="role">Role</label>
-            <select name="role" onChange={handleInputChange}>
-                <option value="kasir">Kasir</option>
-                <option value="Stok">Stok</option>
+            <label htmlFor="store_id">Tempat Toko</label>
+            <select name="store_id">
+                {stores.map((store) => (
+                    <option key={store.id} value={store.id}>{store.name}</option>
+                ))}
             </select>
+
             <button type="submit">Tambah User</button>
         </form>
     )

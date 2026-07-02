@@ -45,6 +45,14 @@ def login():
 
 ##super Admin
 
+@app.route('/api/store',methods=['GET'])
+def get_stores():
+    cursor.execute(
+        "SELECT id,name FROM stores"
+    )
+    stores = cursor.fetchall()
+    return jsonify({"stores": stores})
+
 @app.route('/api/store/create',methods=['POST'])
 def create_store():
     data = request.get_json()
@@ -55,6 +63,7 @@ def create_store():
     )
     conn.commit()
     return jsonify({"message": "Store created successfully"})
+
 
 @app.route('/api/product/create',methods=['POST'])
 def create_product():
@@ -82,17 +91,55 @@ def create_supplier():
     return jsonify({"message": "Supplier created successfully"})
 
 @app.route('/api/user/create',methods=['POST'])
-def create_user():
+def create_user_admin():
     data = request.get_json()
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
-    role = data.get('role')
+    store_id = data.get('store_id')
     cursor.execute(
-        "INSERT INTO users (name, email, password, role) VALUES ("+ "'"+ name +"'"+ ", "+ "'"+ email +"'"+ ", "+ "'"+ password +"'"+ ", "+ "'"+ role +"'"+")"
-    )
+        "INSERT INTO users (name, email, password, store_id, role) VALUES ("+ "'"+ name +"'"+ ", "+ "'"+ email +"'"+ ", "+ "'"+ password +"'"+ ", "+ str(store_id) + ", "+ 'Admin' + ")")
     conn.commit()
     return jsonify({"message": "User created successfully"})
 
+@app.route('/api/product', methods=['GET'])
+def get_products():
+    cursor.execute(
+        "SELECT id, name, price, category FROM products"
+    )
+    columns = [desc[0] for desc in cursor.description]
+    products = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    return jsonify({"products": products})
+
+@app.route('/api/transaction/create', methods=['POST'])
+def create_transaction():
+    data = request.get_json()
+    store_id = session.get('store_id')
+    products = data.get('products')
+    detail_insert = []
+    total_price = 0
+
+    cursor.execute(
+        """
+        INSERT INTO transactions (store_id, total_price,payment) VALUES (%s, %s)
+        RETURNING id
+        """,
+        (store_id, total_price,)
+    )
+    transaction_id = cursor.fetchone()[0]
+    total_price = 0
+    for product in products:
+        cursor.executemany(
+            """
+            INSERT INTO detail_transaction (transaction_id, product_id, quantity, total) VALUES %s
+            """,
+            detail_insert
+        )
+    
+    conn.commit()
+    return jsonify({"message": "Order created successfully"})
+    
+
+    
 if __name__ == '__main__':
     app.run(debug=True)
