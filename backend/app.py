@@ -139,7 +139,35 @@ def create_transaction():
     conn.commit()
     return jsonify({"message": "Order created successfully"})
     
+@app.route('/api/warehouse/create',methods=['POST'])
+def create_warehouse():
+    data = request.get_json()
+    location = data.get('location')
+    store_id = session.get('store_id')
+    cursor.execute(
+        "SELECT location FROM warehouse WHERE location = "+ "'"+ location +"'"+ " AND store_id = "+ str(store_id)
+    )
+    warehouse = cursor.fetchone()
+    if warehouse:
+        return jsonify({"message": "Tempat Gudang sudah ada"})
+    else:
+        cursor.execute(
+            "INSERT INTO warehouse (location, store_id) VALUES ("+ "'"+ location +"'"+ ", "+ str(store_id) + ")"
+        )
+        conn.commit()
+        return jsonify({"message": "Warehouse created successfully"})
 
+@app.route('/api/stock/create',methods=['POST'])
+def create_stock():
+    data = request.get_json()
+    product_id = data.get('product_id')
+    supplier_id = data.get('supplier_id')
+
+    cursor.execute(
+        "INSERT INTO stocks (warehouse_id,product_id, supplier_id) VALUES ("+ "'"+ "NULL" +"'"+ ", "+ "'"+ str(product_id) +"'"+ ", "+ "'"+ str(supplier_id) +"'"+ ")")
+    conn.commit()
+    return jsonify({"message": "Stock created successfully"})
+    
     
 if __name__ == '__main__':
     app.run(debug=True)

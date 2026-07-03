@@ -17,14 +17,12 @@ export default function CreateTransaction(){
     const addToCart = (product) => {
         const existingItem = cart.find(item => item.id === product.id)
         if (existingItem) {
-            // Jika produk sudah ada, tambahkan quantity-nya
             setCart(cart.map(item => 
                 item.id === product.id 
                     ? { ...item, quantity: item.quantity + 1 } 
                     : item
             ))
         } else {
-            // Jika belum ada, masukkan produk baru dengan quantity awal 1
             setCart([...cart, { ...product, quantity: 1 }])
         }
     }
