@@ -54,24 +54,14 @@ def create_table_product_suppliers():
     """)
     conn.commit()
 
-def create_table_warehouse():
-    cursor.execute("""
-        CREATE TABLE warehouse(
-            id SERIAL PRIMARY KEY,
-            location varchar(100) not null,
-            store_id int REFERENCES stores(id) ON DELETE CASCADE,
-            updated_at timestamp default current_timestamp
-        )
-    """)
-    conn.commit()
-
 def create_table_stocks():
     cursor.execute("""
         CREATE TABLE stocks(
             id SERIAL PRIMARY KEY,
-            warehouse_id int REFERENCES warehouse(id) ON DELETE CASCADE,
+            store_id int REFERENCES stores(id) ON DELETE CASCADE,
             product_id int REFERENCES products(id) ON DELETE CASCADE,
             supplier_id int REFERENCES suppliers(id) ON DELETE CASCADE,
+            warehouse_position varchar(255),
             quantity int default 0,
             updated_at timestamp default current_timestamp
         )
@@ -139,10 +129,10 @@ def create_table_users():
 # create_table_supplier()
 # create_table_product_suppliers()
 # create_table_warehouse()
-# create_table_stocks()
+create_table_stocks()
 # create_table_reports()
-create_table_transactions()
-create_table_detail_transaction()
+# create_table_transactions()
+# create_table_detail_transaction()
 
 # create_table_users()
 

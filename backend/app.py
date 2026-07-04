@@ -14,6 +14,7 @@ from flask import (
 from flask_cors import CORS
 from config import SECRET_KEY
 from common.connection import get_connection
+from psycopg2.extras import execute_values
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
@@ -114,48 +115,51 @@ def get_products():
 @app.route('/api/transaction/create', methods=['POST'])
 def create_transaction():
     data = request.get_json()
-    store_id = session.get('store_id')
+    store_id = session.get('store_id') 
     products = data.get('products')
-    detail_insert = []
-    total_price = 0
+    payment_method = data.get('payment_method')
 
-    cursor.execute(
-        """
-        INSERT INTO transactions (store_id, total_price,payment) VALUES (%s, %s)
-        RETURNING id
-        """,
-        (store_id, total_price,)
-    )
-    transaction_id = cursor.fetchone()[0]
-    total_price = 0
-    for product in products:
-        cursor.executemany(
+    status = "Selesai"
+
+    if payment_method == "Qris":
+        status = "Pending"
+
+    if not products:
+        return jsonify({"message": "Keranjang kosong"}), 400
+
+    total_price = sum(float(product['price']) * int(product['quantity']) for product in products)
+
+    amount_paid = data.get('amount_paid')
+    change = amount_paid - total_price
+
+    try:
+        cursor.execute(
             """
-            INSERT INTO detail_transaction (transaction_id, product_id, quantity, total) VALUES %s
+            INSERT INTO orders (store_id, total_price,payment_method,amount_paid,change,status) VALUES (%s, %s,%s,%s,%s,%s)
+            RETURNING id
             """,
+            (store_id, total_price,payment_method,amount_paid,change,status)
+        )
+        order_id = cursor.fetchone()[0]
+
+        detail_insert = [
+            (order_id, product['id'], int(product['quantity']), float(product['price']) * int(product['quantity']))
+            for product in products
+        ]
+        
+        execute_values(
+            cursor,
+            "INSERT INTO detail_order (order_id, product_id, quantity, total) VALUES %s",
             detail_insert
         )
-    
-    conn.commit()
-    return jsonify({"message": "Order created successfully"})
-    
-@app.route('/api/warehouse/create',methods=['POST'])
-def create_warehouse():
-    data = request.get_json()
-    location = data.get('location')
-    store_id = session.get('store_id')
-    cursor.execute(
-        "SELECT location FROM warehouse WHERE location = "+ "'"+ location +"'"+ " AND store_id = "+ str(store_id)
-    )
-    warehouse = cursor.fetchone()
-    if warehouse:
-        return jsonify({"message": "Tempat Gudang sudah ada"})
-    else:
-        cursor.execute(
-            "INSERT INTO warehouse (location, store_id) VALUES ("+ "'"+ location +"'"+ ", "+ str(store_id) + ")"
-        )
+
+
         conn.commit()
-        return jsonify({"message": "Warehouse created successfully"})
+        return jsonify({"message": "Order created successfully"})
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating transaction: {e}")
+        return jsonify({"message": f"Transaction failed: {str(e)}"}), 500
 
 @app.route('/api/stock/create',methods=['POST'])
 def create_stock():

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 export default function CreateTransaction(){
     const [products, setProducts] = useState([])
     const [cart, setCart] = useState([])
+    const [paymentMethod, setPaymentMethod] = useState('Tunai')
+    const [amountPaid, setAmountPaid] = useState(0)
 
     const getProducts = async () => {
         try {
@@ -41,7 +43,13 @@ export default function CreateTransaction(){
     }
 
     const createTransaction = async () => {
-        // Implementasi integrasi API untuk transaksi
+        const response = await axios.post('http://localhost:5000/api/transaction/create', {
+            products: cart,
+            total_price: grandTotal,
+            payment_method: paymentMethod,
+            amount_paid: amountPaid,
+            status: 'Selesai'
+        })
     }
 
     useEffect(() => {
@@ -96,8 +104,17 @@ export default function CreateTransaction(){
                 </div>
             ))}
 
+
+
             <form onSubmit={(e) => e.preventDefault()} className="mt-6">
                 <p className="text-lg font-bold">Total : Rp {grandTotal}</p>
+                <select name="payment_method" onChange={(e) => setPaymentMethod(e.target.value)}>
+                    <option value="Tunai">Tunai</option>
+                    <option value="Qris">Qris</option>
+                </select>
+                {paymentMethod === 'Tunai' && (
+                    <input type="number" name="amount_paid" value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)} className="border rounded px-2 py-1 text-center" />
+                )}
                 <button 
                     onClick={createTransaction}
                     className="bg-green-500 text-white px-4 py-2 rounded mt-2 hover:bg-green-600"
