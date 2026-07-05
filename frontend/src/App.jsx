@@ -1,22 +1,26 @@
 import { useState,useEffect } from 'react'
-import axios from 'axios'
+
+import {Routes,Route,BrowserRouter} from 'react-router-dom'
+import Navbar from './components/Navbar'
+import Footer from './components/Footer'
+import Home from './pages/Home'
+import Login from './pages/Login'
+import Admin from './pages/admin/Admin'
 
 function App() {
-  const [message,setMessage] = useState({})
-
-  async function getData() {
-    const { data } = await axios.get('/api/data')
-    setMessage(data)
-  }
-
-  useEffect(()=>{
-    getData()
-  },[])
 
   return (
     <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h1>React + Flask Integration</h1>
-      <p>{message.message}</p>
+      <BrowserRouter>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/transaction/{id}" element={<DetailTransaction />} />
+        </Routes>
+        <Footer />
+      </BrowserRouter>
       <p>{message.status}</p>
     </div>  
   )

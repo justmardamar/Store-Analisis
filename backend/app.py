@@ -112,6 +112,21 @@ def get_products():
     products = [dict(zip(columns, row)) for row in cursor.fetchall()]
     return jsonify({"products": products})
 
+@app.route('/api/transactions', methods=['GET'])
+def get_transactions():
+    store_id = session.get('store_id')
+    cursor.execute(
+        """
+        SELECT id,total_price,amount_paid,change,payment_method
+        FROM transactions
+        WHERE store_id = %s 
+        """,(store_id,)
+    )
+    result = cursor.fetchall()
+    column = [desc[0] for desc in cursor.description]
+    transactions = [dict(zip(columns,row)) for row in result]
+    return jsonify({"transactions": transactions})
+
 @app.route('/api/transaction/create', methods=['POST'])
 def create_transaction():
     data = request.get_json()
@@ -153,7 +168,6 @@ def create_transaction():
             detail_insert
         )
 
-
         conn.commit()
         return jsonify({"message": "Order created successfully"})
     except Exception as e:
@@ -166,9 +180,10 @@ def create_stock():
     data = request.get_json()
     product_id = data.get('product_id')
     supplier_id = data.get('supplier_id')
+    store_id = session.get('store_id')
 
     cursor.execute(
-        "INSERT INTO stocks (warehouse_id,product_id, supplier_id) VALUES ("+ "'"+ "NULL" +"'"+ ", "+ "'"+ str(product_id) +"'"+ ", "+ "'"+ str(supplier_id) +"'"+ ")")
+        "INSERT INTO stocks (warehouse_id,product_id, supplier_id,store_id) VALUES ("+ "'"+ "NULL" +"'"+ ", "+ "'"+ str(product_id) +"'"+ ", "+ "'"+ str(supplier_id) +"'"+ ", "+ "'"+ str(store_id) +"'"+ ")")
     conn.commit()
     return jsonify({"message": "Stock created successfully"})
     
