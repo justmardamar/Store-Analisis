@@ -124,8 +124,21 @@ def get_transactions():
     )
     result = cursor.fetchall()
     column = [desc[0] for desc in cursor.description]
-    transactions = [dict(zip(columns,row)) for row in result]
+    transactions = [dict(zip(column,row)) for row in result]
     return jsonify({"transactions": transactions})
+
+@app.route('/api/transaction/<id>',methods=['GET'])
+def get_transaction(id):
+    cursor.execute(
+        """
+        SELECT * FROM transactions WHERE id = %s
+        """,
+        (id,)
+    )
+    result = cursor.fetchone()
+    column = [desc[0] for desc in cursor.description]
+    transaction = dict(zip(column,result))
+    return jsonify({"transaction": transaction})
 
 @app.route('/api/transaction/create', methods=['POST'])
 def create_transaction():
@@ -186,6 +199,19 @@ def create_stock():
         "INSERT INTO stocks (warehouse_id,product_id, supplier_id,store_id) VALUES ("+ "'"+ "NULL" +"'"+ ", "+ "'"+ str(product_id) +"'"+ ", "+ "'"+ str(supplier_id) +"'"+ ", "+ "'"+ str(store_id) +"'"+ ")")
     conn.commit()
     return jsonify({"message": "Stock created successfully"})
+@app.route('/api/stock/updateWarehouse')
+def get_warehouse_null():
+    cursor.execute(
+        """
+        SELECT id, product_id,supplier_id FROM stocks WHERE warehouse_id = NULL and store_id = %s
+        """,
+        (session['store_id'],)
+    )
+    result = cursor.fetchall()
+    column = [desc[0] for desc in cursor.description]
+    stocks = [dict(zip(column,row)) for row in result]
+    return jsonify({"stocks":stocks})
+
     
     
 if __name__ == '__main__':
