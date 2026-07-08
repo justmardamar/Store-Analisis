@@ -15,10 +15,12 @@ from flask_cors import CORS
 from config import SECRET_KEY
 from common.connection import get_connection
 from psycopg2.extras import execute_values
+from middleware.LoginAuth import login_required
+import bcrypt
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
-CORS(app)
+CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
 conn = get_connection()
 cursor = conn.cursor()
@@ -30,43 +32,52 @@ def login():
     password = data.get('password')
 
     cursor.execute(
-        "SELECT * FROM users WHERE email = "+ "'"+ email +"'"+ " AND password = "+ "'"+ password + "'"
+        "SELECT id,name,email,store_id,role,password FROM users WHERE email = "+ "'"+ email +"'"
     )
     user = cursor.fetchone()
 
     if user:
-        session['user_id'] = user[0]
-        session['username'] = user[1]
-        session['role'] = user[4]
-        session['store_id'] = user[5]
-        return jsonify({"message": "Login success"})
+        column = [desc[0] for desc in cursor.description]
+        user = dict(zip(column, user))
 
-    else:
-        return jsonify({"message": "Login failed"})
+        if bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+            session['user_id'] = user['id']
+            session['username'] = user['name']
+            session['role'] = user['role']
+            session['store_id'] = user['store_id']
+            return jsonify({"isLoggedIn": True, "role": user['role']})
+
+    return jsonify({"isLoggedIn": False})
 
 ##super Admin
 
 @app.route('/api/store',methods=['GET'])
+@login_required
 def get_stores():
     cursor.execute(
         "SELECT id,name FROM stores"
     )
     stores = cursor.fetchall()
+    columns = [desc[0] for desc in cursor.description]
+    stores = [dict(zip(columns, row)) for row in stores]
     return jsonify({"stores": stores})
 
 @app.route('/api/store/create',methods=['POST'])
+@login_required
 def create_store():
     data = request.get_json()
     name = data.get('name')
     address = data.get('address')
     cursor.execute(
-        "INSERT INTO stores (name, address) VALUES ("+ "'"+ name +"'"+ " AND password = "+ "'"+ address + "'"
+        "INSERT INTO stores (name, address) VALUES (%s, %s)",
+        (name, address)
     )
     conn.commit()
     return jsonify({"message": "Store created successfully"})
 
 
 @app.route('/api/product/create',methods=['POST'])
+@login_required
 def create_product():
     data = request.get_json()
     name = data.get('name')
@@ -74,36 +85,47 @@ def create_product():
     category = data.get('category')
     store_id = session.get('store_id')
     cursor.execute(
-        "INSERT INTO products (name, price, category, store_id) VALUES ("+ "'"+ name +"'"+ ", "+ "'"+ price +"'"+ ", "+ "'"+ category +"'"+ ", "+ "'"+ str(store_id) +"'")
+        "INSERT INTO products (name, price, category, store_id) VALUES (%s, %s, %s, %s)",
+        (name, price, category, store_id)
+    )
 
     conn.commit()
     return jsonify({"message": "Product created successfully"})
 
 @app.route('/api/supplier/create',methods=['POST'])
+@login_required
 def create_supplier():
     data = request.get_json()
     name = data.get('name')
     phone_number = data.get('phoneNumber')
     address = data.get('address')
     cursor.execute(
-        "INSERT INTO suppliers (name, phone_number, address) VALUES ("+ "'"+ name +"'"+ ", "+ "'"+ phone_number +"'"+ ", "+ "'"+ address +"'"+")"
+        "INSERT INTO suppliers (name, phone_number, address) VALUES (%s, %s, %s)",
+        (name, phone_number, address)
     )
     conn.commit()
     return jsonify({"message": "Supplier created successfully"})
 
 @app.route('/api/user/create',methods=['POST'])
+@login_required
 def create_user_admin():
     data = request.get_json()
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
     store_id = data.get('store_id')
+    
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    
     cursor.execute(
-        "INSERT INTO users (name, email, password, store_id, role) VALUES ("+ "'"+ name +"'"+ ", "+ "'"+ email +"'"+ ", "+ "'"+ password +"'"+ ", "+ str(store_id) + ", "+ 'Admin' + ")")
+        "INSERT INTO users (name, email, password, store_id, role) VALUES (%s, %s, %s, %s, %s)",
+        (name, email, hashed_password, store_id, 'Admin')
+    )
     conn.commit()
     return jsonify({"message": "User created successfully"})
 
 @app.route('/api/product', methods=['GET'])
+@login_required
 def get_products():
     cursor.execute(
         "SELECT id, name, price, category FROM products"
@@ -113,6 +135,7 @@ def get_products():
     return jsonify({"products": products})
 
 @app.route('/api/transactions', methods=['GET'])
+@login_required
 def get_transactions():
     store_id = session.get('store_id')
     cursor.execute(
@@ -128,6 +151,7 @@ def get_transactions():
     return jsonify({"transactions": transactions})
 
 @app.route('/api/transaction/<id>',methods=['GET'])
+@login_required
 def get_transaction(id):
     cursor.execute(
         """
@@ -141,6 +165,7 @@ def get_transaction(id):
     return jsonify({"transaction": transaction})
 
 @app.route('/api/transaction/create', methods=['POST'])
+@login_required
 def create_transaction():
     data = request.get_json()
     store_id = session.get('store_id') 
@@ -189,28 +214,35 @@ def create_transaction():
         return jsonify({"message": f"Transaction failed: {str(e)}"}), 500
 
 @app.route('/api/stock/create',methods=['POST'])
+@login_required
 def create_stock():
     data = request.get_json()
     product_id = data.get('product_id')
     supplier_id = data.get('supplier_id')
     store_id = session.get('store_id')
 
+    # Gunakan parameterized query dan masukkan None agar diterjemahkan sebagai NULL oleh psycopg2
     cursor.execute(
-        "INSERT INTO stocks (warehouse_id,product_id, supplier_id,store_id) VALUES ("+ "'"+ "NULL" +"'"+ ", "+ "'"+ str(product_id) +"'"+ ", "+ "'"+ str(supplier_id) +"'"+ ", "+ "'"+ str(store_id) +"'"+ ")")
+        "INSERT INTO stocks (warehouse_id, product_id, supplier_id, store_id) VALUES (%s, %s, %s, %s)",
+        (None, product_id, supplier_id, store_id)
+    )
     conn.commit()
     return jsonify({"message": "Stock created successfully"})
+
 @app.route('/api/stock/updateWarehouse')
+@login_required
 def get_warehouse_null():
+    # Gunakan 'IS NULL' alih-alih '= NULL' karena perbandingan NULL di SQL harus menggunakan operator 'IS'
     cursor.execute(
         """
-        SELECT id, product_id,supplier_id FROM stocks WHERE warehouse_id = NULL and store_id = %s
+        SELECT id, product_id, supplier_id FROM stocks WHERE warehouse_id IS NULL AND store_id = %s
         """,
         (session['store_id'],)
     )
     result = cursor.fetchall()
     column = [desc[0] for desc in cursor.description]
-    stocks = [dict(zip(column,row)) for row in result]
-    return jsonify({"stocks":stocks})
+    stocks = [dict(zip(column, row)) for row in result]
+    return jsonify({"stocks": stocks})
 
     
     

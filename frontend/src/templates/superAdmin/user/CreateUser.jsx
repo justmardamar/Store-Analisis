@@ -6,7 +6,8 @@ export default function CreateUser(){
         name : "",
         email : "",
         password : "",
-        role : ""
+        role : "",
+        store_id : ""
     })
 
     const [stores, setStores] = useState([])
@@ -22,8 +23,9 @@ export default function CreateUser(){
     const getStores = async () => {
         const response = await axios.get('http://localhost:5000/api/store')
         if(response.status === 200){
-            setStores(response.data.stores)
+            setStores(response)
         }
+        console.log(stores)
     }
     
 
@@ -36,6 +38,8 @@ export default function CreateUser(){
                 name : "",
                 email : "",
                 password : "",
+                role : "",
+                store_id : ""
             })
         }
     }
@@ -53,9 +57,10 @@ export default function CreateUser(){
             <label htmlFor="password">Password</label>
             <input type="text" name="password" placeholder="Masukkan Password" onChange={handleInputChange}/>
             <label htmlFor="store_id">Tempat Toko</label>
-            <select name="store_id">
-                {stores.map((store) => (
-                    <option key={store.id} value={store.id}>{store.name}</option>
+            <select name="store_id" onChange={handleInputChange}>
+                <option value="">Pilih Toko</option>
+                {stores.map((store,index) => (
+                    <option key={index} value={store.id}>{store.name}</option>
                 ))}
             </select>
 

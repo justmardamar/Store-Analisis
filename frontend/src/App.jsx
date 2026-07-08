@@ -1,27 +1,36 @@
-import { useState,useEffect } from 'react'
-
 import {Routes,Route,BrowserRouter} from 'react-router-dom'
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Admin from './pages/admin/Admin'
+import Login from './templates/auth/Login'
+import CreateProduct from './templates/admin/product/CreateProduct'
+import ListTransaction from './templates/admin/transaction/ListTransaction'
+import DetailTransaction from './templates/admin/transaction/DetailTransaction'
+import LoginAuthRoute from './components/LoginAuthRoute'
+import CreateStore from './templates/superAdmin/store/CreateStore'
+import CreateUser from './templates/superAdmin/user/CreateUser'
+import Dashboard from './templates/dashboard/Dashboard'
 
 function App() {
 
   return (
     <div style={{ textAlign: 'center', marginTop: '50px' }}>
       <BrowserRouter>
-        <Navbar />
+        {/* Commented out Navbar and Footer because they are not defined yet */}
+        {/* <Navbar /> */}
         <Routes>
-          <Route path="/" element={<Home />} />
+          {/* Halaman Login harus berada di luar LoginAuthRoute agar bisa diakses publik */}
           <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/transaction/{id}" element={<DetailTransaction />} />
+
+          {/* Halaman yang diproteksi (wajib login) */}
+          <Route element={<LoginAuthRoute/>}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/admin/createProduct" element={<CreateProduct />} />
+            <Route path="/admin/transaction" element={<ListTransaction />} />
+            <Route path="/admin/transaction/:id" element={<DetailTransaction />} />
+            <Route path='/superAdmin/createStore' element={<CreateStore/>} />
+            <Route path='/superAdmin/createUser' element={<CreateUser/>} />
+          </Route>
         </Routes>
-        <Footer />
+        {/* <Footer /> */}
       </BrowserRouter>
-      <p>{message.status}</p>
     </div>  
   )
 }

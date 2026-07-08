@@ -1,6 +1,10 @@
-from flask import session,jsonify
+from functools import wraps
+from flask import session, jsonify
 
-def checkLogin():
-    if not session['user_id']:
-        return jsonify({"messege":"User Not Log in "})
-    
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('user_id'):
+            return jsonify({"message": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated_function

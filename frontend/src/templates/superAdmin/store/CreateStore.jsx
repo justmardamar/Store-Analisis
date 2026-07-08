@@ -16,7 +16,8 @@ export default function CreateStore(){
         })
     }
 
-    const handleCreateStore = async () => {
+    const handleCreateStore = async (e) => {
+        e.preventDefault()
         const res = await axios.post("http://localhost:5000/api/store/create",store)
         if(res.data.message){
             console.log("Store created successfully")
