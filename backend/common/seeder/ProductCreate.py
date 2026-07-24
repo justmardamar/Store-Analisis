@@ -1,18 +1,26 @@
-from common.connection import get_connection
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-conn = get_connection()
+from common.database import db_session
+from common.models import Product
 
-def create_store():
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO products (store_id,name,price,category) VALUE (%s,%s)",('[Store_id]','Kitkat',18000,'Makanan')
-    )
-    cursor.commit()
-    cursor.close()
+def createProduct():
+    try:
+        product = Product(#tambahin store id
+            store_id="[Store_id]",
+            name="Biskuit",
+            price=10000,
+            category="Makanan",
+        )
+        db_session.add(product)
+        db_session.commit()
+        print(f"Product '{product.name}' berhasil dibuat!")
+    except Exception as e:
+        db_session.rollback()
+        print(f"Terjadi kesalahan saat seeding: {e}")
+    finally:
+        db_session.remove()
 
-try:
-    create_store()
-    print('Seeding berhasil!')
-    conn.close()
-except Exception as e:
-    print(f'Terjadi kesalahan saat seeding : {e}')
+if __name__ == '__main__':
+    createProduct()
