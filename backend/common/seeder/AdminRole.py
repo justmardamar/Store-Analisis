@@ -2,36 +2,30 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from common.connection import get_connection
+from common.database import db_session
+from common.models import User
 import bcrypt
 
-conn = get_connection()
+def seed_admin():
+    try:
+        hashed_password = bcrypt.hashpw("admin123".encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-def add_store():
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO stores (name, address) VALUES (%s, %s) RETURNING id",
-        ("Super Store", "Jl. KH Ahmad Dahlan No. 45")
-    )
-    store_id = cursor.fetchone()[0]
-    conn.commit()
-    cursor.close()
-    return store_id
+        new_admin = User(
+            name="admin",
+            email="admin01@gmail.com",
+            password=hashed_password,
+            role="Admin",
+            store_id="[store.id]" #masukin storeidnya
+        )
+        db_session.add(new_admin)
+        db_session.commit()
+        print(f"User Admin '{new_admin.name}' berhasil dibuat!")
 
-def create_admin_role(store_id):
-    cursor = conn.cursor()
-    hashed_password = bcrypt.hashpw("admin123".encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    cursor.execute(
-        "INSERT INTO users (name, email, password, role, store_id) VALUES (%s, %s, %s, %s, %s)",
-        ("admin", "admin01@gmail.com", hashed_password, "admin", store_id)
-    )
-    conn.commit()
-    cursor.close()
+    except Exception as e:
+        db_session.rollback()
+        print(f"Terjadi kesalahan saat seeding: {e}")
+    finally:
+        db_session.remove()
 
-try:
-    store_id = add_store()
-    create_admin_role(store_id)
-    print("Seeding berhasil!")
-    conn.close()
-except Exception as e:
-    print(f"Terjadi kesalahan saat seeding: {e}")
+if __name__ == '__main__':
+    seed_admin()
