@@ -1,139 +1,143 @@
-from connection import get_connection
+import sys
+import os
 
-conn = get_connection()
-cursor = conn.cursor()
+# Menambahkan parent directory ke sys.path agar import 'common' bekerja dengan baik
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-def create_table_stores():
-    cursor.execute("""
-    CREATE TABLE stores(
-        id SERIAL PRIMARY KEY,
-        name varchar(100) not null,
-        address text,
-        created_at timestamp default current_timestamp,
-        updated_at timestamp default current_timestamp
-    );
-    """)
-    conn.commit()
+from common.database import get_db_cursor
 
-def create_table_products():
-    cursor.execute("""
-        CREATE TABLE products(
-            id SERIAL PRIMARY KEY,
-            store_id int REFERENCES stores(id) ON DELETE CASCADE,
-            name varchar(100) not null,
-            price numeric(12,2) not null,
-            category varchar(50) CHECK (category IN ('Makanan','Minuman', 'Kebutuhan Pokok' )),
-            created_at timestamp default current_timestamp,
-            updated_at timestamp default current_timestamp
-        )
-    """)
-    conn.commit()
+CREATE_TABLES_SQL = """
+-- 1. STORES
+CREATE TABLE IF NOT EXISTS stores (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    address TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-def create_table_supplier():
-    cursor.execute("""
-        CREATE TABLE suppliers(
-            id SERIAL PRIMARY KEY,
-            name varchar(100) not null,
-            phone_number varchar(13) not null,
-            address text,
-            created_at timestamp default current_timestamp,
-            updated_at timestamp default current_timestamp
-        )
-    """)
-    conn.commit()
+-- 2. USERS
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL,
+    store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-def create_table_product_suppliers():
-    cursor.execute("""
-        CREATE TABLE product_suppliers(
-            id SERIAL PRIMARY KEY,
-            product_id int REFERENCES products(id) ON DELETE CASCADE,
-            supplier_id int REFERENCES suppliers(id) ON DELETE CASCADE,
-            created_at timestamp default current_timestamp,
-            updated_at timestamp default current_timestamp
-        )
-    """)
-    conn.commit()
+-- 3. PRODUCTS
+CREATE TABLE IF NOT EXISTS products (
+    id SERIAL PRIMARY KEY,
+    store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    price NUMERIC(12,2) NOT NULL,
+    category VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-def create_table_stocks():
-    cursor.execute("""
-        CREATE TABLE stocks(
-            id SERIAL PRIMARY KEY,
-            store_id int REFERENCES stores(id) ON DELETE CASCADE,
-            product_id int REFERENCES products(id) ON DELETE CASCADE,
-            supplier_id int REFERENCES suppliers(id) ON DELETE CASCADE,
-            warehouse_position varchar(255),
-            quantity int default 0,
-            updated_at timestamp default current_timestamp
-        )
-    """)
-    conn.commit()
+-- 4. SUPPLIERS
+CREATE TABLE IF NOT EXISTS suppliers (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    phone_number VARCHAR(13) NOT NULL,
+    address TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-def create_table_reports():
-    cursor.execute("""
-        CREATE TABLE reports(
-            id SERIAL PRIMARY KEY,
-            store_id int REFERENCES stores(id) ON DELETE CASCADE,
-            product_id int REFERENCES products(id) ON DELETE CASCADE,
-            quantity_change int not null,
-            type varchar(10) CHECK (type IN ('in', 'out')),
-            reason text,
-            created_at timestamp default current_timestamp
-            )
-    """)
-    conn.commit()
+-- 5. PRODUCT_SUPPLIERS
+CREATE TABLE IF NOT EXISTS product_suppliers (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+    supplier_id INTEGER REFERENCES suppliers(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-def create_table_detail_transaction():
-    cursor.execute("""
-        CREATE TABLE detail_transaction(
-            transaction_id int REFERENCES transactions(id) ON DELETE CASCADE,
-            product_id int REFERENCES products(id) ON DELETE CASCADE,
-            quantity int not null,
-            total numeric(12,2) not null
-        )
-    """)
-    conn.commit()
+-- 6. WAREHOUSE
+CREATE TABLE IF NOT EXISTS warehouse (
+    id SERIAL PRIMARY KEY,
+    location VARCHAR(100) NOT NULL,
+    store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-def create_table_transactions():
-    cursor.execute("""
-        CREATE TABLE transactions(
-            id SERIAL PRIMARY KEY,
-            store_id int REFERENCES stores(id) ON DELETE CASCADE UNIQUE,
-            total_price numeric(12,2) not null,
-            amount_paid numeric(12,2) not null,
-            change numeric(12,2) not null,
-            status varchar(20) CHECK (status IN ('Selesai', 'Pending')),
-            payment_method varchar(20) CHECK (payment_method IN ('Tunai', 'Qris')),
-            created_at timestamp default current_timestamp
-        )
-    """)
-    conn.commit()
+-- 7. STOCKS
+CREATE TABLE IF NOT EXISTS stocks (
+    id SERIAL PRIMARY KEY,
+    warehouse_id INTEGER REFERENCES warehouse(id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+    supplier_id INTEGER REFERENCES suppliers(id) ON DELETE CASCADE,
+    store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+    quantity INTEGER DEFAULT 0,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-def create_table_users():
-    cursor.execute("""
-        CREATE TABLE users(
-            id SERIAL PRIMARY KEY,
-            name varchar(100) not null,
-            email varchar(100) not null UNIQUE,
-            password varchar(255) not null,
-            role varchar(20) CHECK (role IN ('Super Admin','Admin','kasir','Stok')),
-            store_id int REFERENCES stores(id) ON DELETE CASCADE default Null,
-            created_at timestamp default current_timestamp,
-            updated_at timestamp default current_timestamp
-        )
-    """)
-    conn.commit()
+-- 8. REPORTS
+CREATE TABLE IF NOT EXISTS reports (
+    id SERIAL PRIMARY KEY,
+    store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+    quantity_change INTEGER NOT NULL,
+    type VARCHAR(10) CHECK (type IN ('in', 'out')),
+    reason TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
+-- 9. ORDERS
+CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+    total_price NUMERIC(12,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-# create_table_stores()
-# create_table_products()
-# create_table_supplier()
-# create_table_product_suppliers()
-# create_table_warehouse()
-create_table_stocks()
-# create_table_reports()
-# create_table_transactions()
-# create_table_detail_transaction()
+-- 10. DETAIL_ORDER
+CREATE TABLE IF NOT EXISTS detail_order (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+    quantity INTEGER NOT NULL,
+    total NUMERIC(12,2) NOT NULL
+);
 
-# create_table_users()
+-- 11. TRANSACTIONS
+CREATE TABLE IF NOT EXISTS transactions (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+    payment_method VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"""
 
-conn.close()
+DROP_TABLES_SQL = """
+DROP TABLE IF EXISTS transactions CASCADE;
+DROP TABLE IF EXISTS detail_order CASCADE;
+DROP TABLE IF EXISTS orders CASCADE;
+DROP TABLE IF EXISTS reports CASCADE;
+DROP TABLE IF EXISTS stocks CASCADE;
+DROP TABLE IF EXISTS warehouse CASCADE;
+DROP TABLE IF EXISTS product_suppliers CASCADE;
+DROP TABLE IF EXISTS suppliers CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS stores CASCADE;
+"""
+
+def create_tables():
+    """Membuat seluruh tabel database menggunakan Pure DDL SQL"""
+    with get_db_cursor(commit=True) as cursor:
+        cursor.execute(CREATE_TABLES_SQL)
+
+def reset_tables():
+    """Menghapus dan membuat ulang seluruh tabel dari awal"""
+    with get_db_cursor(commit=True) as cursor:
+        cursor.execute(DROP_TABLES_SQL)
+        cursor.execute(CREATE_TABLES_SQL)
+
+if __name__ == '__main__':
+    create_tables()
