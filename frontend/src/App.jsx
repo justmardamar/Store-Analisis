@@ -6,7 +6,8 @@ import DetailTransaction from './templates/admin/transaction/DetailTransaction'
 import LoginAuthRoute from './components/LoginAuthRoute'
 import CreateStore from './templates/superAdmin/store/CreateStore'
 import CreateUser from './templates/superAdmin/user/CreateUser'
-import Dashboard from './templates/dashboard/Dashboard'
+import ShowTransaction from './templates/kasir/transaction/ShowTransaction'
+import CreateTransaction from './templates/kasir/transaction/CreateTransaction'
 
 function App() {
 
@@ -27,6 +28,8 @@ function App() {
             <Route path="/admin/transaction/:id" element={<DetailTransaction />} />
             <Route path='/superAdmin/createStore' element={<CreateStore/>} />
             <Route path='/superAdmin/createUser' element={<CreateUser/>} />
+            <Route path='/kasir/transaction' element={<ShowTransaction/>} />
+            <Route path='/kasir/transaction/create' element={<CreateTransaction/>} />
           </Route>
         </Routes>
         {/* <Footer /> */}

@@ -296,12 +296,27 @@ def create_stock():
 @login_required
 def get_warehouse_null():
     store_id = session.get('store_id')
+    query = """
+        SELECT 
+            s.id, 
+            s.product_id, 
+            s.supplier_id, 
+            p.name AS product_name, 
+            p.category AS product_category,
+            p.price AS product_price
+        FROM stocks s
+        LEFT JOIN products p ON s.product_id = p.id
+        WHERE s.warehouse_id IS NULL AND s.store_id = %s
+        ORDER BY s.id ASC
+    """
     with get_db_cursor(commit=False) as cursor:
-        cursor.execute(
-            "SELECT id, product_id, supplier_id FROM stocks WHERE warehouse_id IS NULL AND store_id = %s",
-            (store_id,)
-        )
+        cursor.execute(query, (store_id,))
         stocks = cursor.fetchall()
+
+    for s in stocks:
+        if 'product_price' in s and s['product_price'] is not None:
+            s['product_price'] = float(s['product_price'])
+
     return jsonify({"stocks": stocks})
 
 
