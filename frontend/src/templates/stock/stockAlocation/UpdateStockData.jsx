@@ -16,7 +16,31 @@ export default function UpdateStockData(){
         <div className="">
             {updates ? 
             <div className="">
-                
+                <h2>Penataan Warehouse</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nama Produk</th>
+                            <th>Kategori</th>
+                            <th>Harga</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {updates.map((update) => (
+                            <tr key={update.id}>
+                                <td>{update.id}</td>
+                                <td>{update.product_name}</td>
+                                <td>{update.product_category}</td>
+                                <td>{update.product_price}</td>
+                                <td>
+                                    <button>Tambah lokasi gudang</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div> 
             : 'Belum ada data stock yang ditambahkan'}
         </div>
