@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import Link from "react-router-dom";
 
 export default function UpdateStockData(){
     const [updates,setUpdate] = useState([])
@@ -35,7 +36,7 @@ export default function UpdateStockData(){
                                 <td>{update.product_category}</td>
                                 <td>{update.product_price}</td>
                                 <td>
-                                    <button>Tambah lokasi gudang</button>
+                                    <Link to={`/stock/set-location/${update.id}`}>Tambah lokasi gudang</Link>
                                 </td>
                             </tr>
                         ))}
