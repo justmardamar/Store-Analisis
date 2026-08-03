@@ -277,6 +277,32 @@ def create_transaction():
 # STOCKS & WAREHOUSE
 # ================= ================= =================
 
+@app.route('/api/warehouse/store', methods=['GET'])
+@login_required
+def get_warehouses():
+    store_id = session.get('store_id')
+    with get_db_cursor(commit=False) as cursor:
+        cursor.execute("SELECT id, name, location FROM warehouses WHERE store_id = %s ORDER BY id ASC", (store_id,))
+        warehouses = cursor.fetchall()
+    return jsonify({"warehouses": warehouses})
+
+@app.route('/api/warehouse/create', methods=['POST'])
+@login_required
+def create_warehouse():
+    data = request.get_json() or {}
+    name = data.get('name')
+    location = data.get('location')
+
+    if not name or not location:
+        return jsonify({"message": "Nama gudang dan lokasi wajib diisi"}), 400
+
+    with get_db_cursor(commit=True) as cursor:
+        cursor.execute(
+            "INSERT INTO warehouses (name, location) VALUES (%s, %s)",
+            (name, location)
+        )
+    return jsonify({"message": "Gudang berhasil dibuat"})
+
 @app.route('/api/stock/create', methods=['POST'])
 @login_required
 def create_stock():
@@ -319,6 +345,21 @@ def get_warehouse_null():
 
     return jsonify({"stocks": stocks})
 
+@app.route('/api/stock/set-warehouse/<int:stock_id>', methods=['POST'])
+@login_required
+def set_warehouse(stock_id):
+    data = request.get_json() or {}
+    warehouse_id = data.get('warehouse_id')
+
+    if not stock_id or not warehouse_id:
+        return jsonify({"message": "ID stok dan ID gudang wajib diisi"}), 400
+
+    with get_db_cursor(commit=True) as cursor:
+        cursor.execute(
+            "UPDATE stocks SET warehouse_id = %s WHERE id = %s",
+            (warehouse_id, stock_id)
+        )
+    return jsonify({"message": "Lokasi gudang berhasil diperbarui"})
 
 if __name__ == '__main__':
     app.run(debug=True)

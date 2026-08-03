@@ -8,6 +8,8 @@ import CreateStore from './templates/superAdmin/store/CreateStore'
 import CreateUser from './templates/superAdmin/user/CreateUser'
 import ShowTransaction from './templates/kasir/transaction/ShowTransaction'
 import CreateTransaction from './templates/kasir/transaction/CreateTransaction'
+import UpdateStockData from './templates/stock/NewStock/UpdateStockData'
+import AddWarehouse from './templates/stock/NewStock/AddWarehouse'
 
 function App() {
 
@@ -30,6 +32,10 @@ function App() {
             <Route path='/superAdmin/createUser' element={<CreateUser/>} />
             <Route path='/kasir/transaction' element={<ShowTransaction/>} />
             <Route path='/kasir/transaction/create' element={<CreateTransaction/>} />
+            <Route path='/stock/data-location' element={<UpdateStockData/>} />
+            <Route path='/stock/change' element={<ChangeStock/>} />
+            <Route path='/stock/set-location/:id' element={<SetLocation/>} />
+            <Route path='/stock/add-warehouse' element={<AddWarehouse/>} />
           </Route>
         </Routes>
         {/* <Footer /> */}
