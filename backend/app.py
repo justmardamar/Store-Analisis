@@ -49,9 +49,19 @@ def login():
 @login_required
 def get_stores():
     with get_db_cursor(commit=False) as cursor:
-        cursor.execute("SELECT id, name, address FROM stores ORDER BY id ASC")
+        cursor.execute("SELECT id, name, address, status FROM stores ORDER BY id ASC")
         stores = cursor.fetchall()
     return jsonify({"stores": stores})
+
+@app.route('/api/store/<int:id>', methods=['GET'])
+@login_required
+def get_store(id):
+    with get_db_cursor(commit=False) as cursor:
+        cursor.execute("SELECT name, address FROM stores WHERE id = %s", (id,))
+        store = cursor.fetchone()
+    if not store:
+        return jsonify({"message": "Store not found"}), 404
+    return jsonify({"store": store})
 
 @app.route('/api/store/create', methods=['POST'])
 @login_required
@@ -69,6 +79,24 @@ def create_store():
             (name, address)
         )
     return jsonify({"message": "Store created successfully"})
+
+@app.route('/api/store/update/<int:id>', methods=['PUT'])
+@login_required
+def update_store(id):
+    data = request.get_json() or {}
+    name = data.get('name')
+    address = data.get('address')
+    status = data.get('status')
+
+    if not name:
+        return jsonify({"message": "Nama toko wajib diisi"}), 400
+
+    with get_db_cursor(commit=True) as cursor:
+        cursor.execute(
+            "UPDATE stores SET name = %s, address = %s , status = %s WHERE id = %s",
+            (name, address, status, id)
+        )
+    return jsonify({"message": "Store updated successfully"})
 
 @app.route('/api/user/create', methods=['POST'])
 @login_required
