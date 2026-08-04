@@ -10,6 +10,7 @@ TABLE_SCHEMAS = {
         "id": "SERIAL PRIMARY KEY",
         "name": "VARCHAR(100) NOT NULL",
         "address": "TEXT",
+        "status": "VARCHAR(20) DEFAULT 'active'",  # 'active', 'inactive'
         "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
         "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
     },
@@ -20,6 +21,7 @@ TABLE_SCHEMAS = {
         "password": "VARCHAR(255) NOT NULL",
         "role": "VARCHAR(50) NOT NULL",  # 'Super Admin', 'Admin', 'kasir', 'Stok'
         "store_id": "INTEGER REFERENCES stores(id) ON DELETE CASCADE",
+        "status": "VARCHAR(20) DEFAULT 'active'",  # 'active', 'inactive'
         "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
         "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
     },
@@ -29,6 +31,7 @@ TABLE_SCHEMAS = {
         "name": "VARCHAR(100) NOT NULL",
         "price": "NUMERIC(12,2) NOT NULL",
         "category": "VARCHAR(50)",
+        "status": "VARCHAR(20) DEFAULT 'active'",  # 'active', 'inactive'
         "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
         "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
     },
@@ -37,6 +40,7 @@ TABLE_SCHEMAS = {
         "name": "VARCHAR(100) NOT NULL",
         "phone_number": "VARCHAR(13) NOT NULL",
         "address": "TEXT",
+        "status": "VARCHAR(20) DEFAULT 'active'",  # 'active', 'inactive'
         "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
         "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
     },
