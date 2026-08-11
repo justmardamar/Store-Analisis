@@ -2,24 +2,27 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from common.connection import get_connection
+from common.database import db_session
+from common.models import User
 import bcrypt
 
-conn = get_connection()
-
 def create_super_admin():
-    cursor = conn.cursor()
-    hashed_password = bcrypt.hashpw("adminSupper".encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    cursor.execute(
-        "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s)",
-        ("Super admin", "adminSupper@gmail.com", hashed_password, "Super Admin")
-    )
-    conn.commit()
-    cursor.close()
+    try:
+        hashed_password = bcrypt.hashpw("adminSupper".encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        new_admin = User(
+            name="Super admin",
+            email="[EMAIL_ADDRESS]",
+            password=hashed_password,
+            role="Super Admin"
+        )
+        db_session.add(new_admin)
+        db_session.commit()
+        print(f"User Admin '{new_admin.name}' berhasil dibuat!")
+    except Exception as e:
+        db_session.rollback()
+        print(f"Terjadi kesalahan saat seeding: {e}")
+    finally:
+        db_session.remove()
 
-try:
+if __name__ == '__main__':
     create_super_admin()
-    print("Seeding berhasil!")
-    conn.close()
-except Exception as e:
-    print(f"Terjadi kesalahan saat seeding: {e}")

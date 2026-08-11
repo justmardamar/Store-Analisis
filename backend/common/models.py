@@ -1,118 +1,97 @@
-from sqlalchemy import Column, Integer, String, Numeric, Text, ForeignKey, DateTime, func
-from sqlalchemy.orm import relationship
-from common.database import Base
+"""
+Dokumentasi Struktur Tabel Database StoreAnalisis (Tanpa SQLAlchemy ORM)
+---------------------------------------------------------------------
+Seluruh operasi database dilakukan menggunakan Raw SQL (psycopg2).
+File ini berfungsi sebagai referensi struktur tabel & kolom di PostgreSQL.
+"""
 
-class Store(Base):
-    __tablename__ = 'stores'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    address = Column(Text)
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-
-class User(Base):
-    __tablename__ = 'users'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    email = Column(String(100), nullable=False, unique=True)
-    password = Column(String(255), nullable=False)
-    role = Column(String(50), nullable=False)
-    store_id = Column(Integer, ForeignKey('stores.id', ondelete='CASCADE'), nullable=True)
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-
-    store = relationship('Store', backref='users')
-
-class Product(Base):
-    __tablename__ = 'products'
-
-    id = Column(Integer, primary_key=True)
-    store_id = Column(Integer, ForeignKey('stores.id', ondelete='CASCADE'))
-    name = Column(String(100), nullable=False)
-    price = Column(Numeric(12, 2), nullable=False)
-    category = Column(String(50))
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-
-    store = relationship('Store', backref='products')
-
-class Supplier(Base):
-    __tablename__ = 'suppliers'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    phone_number = Column(String(13), nullable=False)
-    address = Column(Text)
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-
-class ProductSupplier(Base):
-    __tablename__ = 'product_suppliers'
-
-    id = Column(Integer, primary_key=True)
-    product_id = Column(Integer, ForeignKey('products.id', ondelete='CASCADE'))
-    supplier_id = Column(Integer, ForeignKey('suppliers.id', ondelete='CASCADE'))
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-
-class Warehouse(Base):
-    __tablename__ = 'warehouse'
-
-    id = Column(Integer, primary_key=True)
-    location = Column(String(100), nullable=False)
-    store_id = Column(Integer, ForeignKey('stores.id', ondelete='CASCADE'))
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-
-class Stock(Base):
-    __tablename__ = 'stocks'
-
-    id = Column(Integer, primary_key=True)
-    warehouse_id = Column(Integer, ForeignKey('warehouse.id', ondelete='CASCADE'), nullable=True)
-    product_id = Column(Integer, ForeignKey('products.id', ondelete='CASCADE'))
-    supplier_id = Column(Integer, ForeignKey('suppliers.id', ondelete='CASCADE'))
-    store_id = Column(Integer, ForeignKey('stores.id', ondelete='CASCADE'), nullable=True)
-    quantity = Column(Integer, default=0)
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-
-class Report(Base):
-    __tablename__ = 'reports'
-
-    id = Column(Integer, primary_key=True)
-    store_id = Column(Integer, ForeignKey('stores.id', ondelete='CASCADE'))
-    product_id = Column(Integer, ForeignKey('products.id', ondelete='CASCADE'))
-    quantity_change = Column(Integer, nullable=False)
-    type = Column(String(10), nullable=False)
-    reason = Column(Text)
-    created_at = Column(DateTime, default=func.now())
-
-class Order(Base):
-    __tablename__ = 'orders'
-
-    id = Column(Integer, primary_key=True)
-    store_id = Column(Integer, ForeignKey('stores.id', ondelete='CASCADE'))
-    total_price = Column(Numeric(12, 2), nullable=False)
-    created_at = Column(DateTime, default=func.now())
-
-class DetailOrder(Base):
-    __tablename__ = 'detail_order'
-
-    id = Column(Integer, primary_key=True)
-    order_id = Column(Integer, ForeignKey('orders.id', ondelete='CASCADE'))
-    product_id = Column(Integer, ForeignKey('products.id', ondelete='CASCADE'))
-    quantity = Column(Integer, nullable=False)
-    total = Column(Numeric(12, 2), nullable=False)
-
-    order = relationship('Order', backref='details')
-    product = relationship('Product')
-
-class Transaction(Base):
-    __tablename__ = 'transactions'
-
-    id = Column(Integer, primary_key=True)
-    order_id = Column(Integer, ForeignKey('orders.id', ondelete='CASCADE'), unique=True)
-    payment_method = Column(String(20))
-    created_at = Column(DateTime, default=func.now())
-
-    order = relationship('Order', backref='transaction')
+TABLE_SCHEMAS = {
+    "stores": {
+        "id": "SERIAL PRIMARY KEY",
+        "name": "VARCHAR(100) NOT NULL",
+        "address": "TEXT",
+        "status": "VARCHAR(20) DEFAULT 'active'",  # 'active', 'inactive'
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    },
+    "users": {
+        "id": "SERIAL PRIMARY KEY",
+        "name": "VARCHAR(100) NOT NULL",
+        "email": "VARCHAR(100) UNIQUE NOT NULL",
+        "password": "VARCHAR(255) NOT NULL",
+        "role": "VARCHAR(50) NOT NULL",  # 'Super Admin', 'Admin', 'kasir', 'Stok'
+        "store_id": "INTEGER REFERENCES stores(id) ON DELETE CASCADE",
+        "status": "VARCHAR(20) DEFAULT 'active'",  # 'active', 'inactive'
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    },
+    "products": {
+        "id": "SERIAL PRIMARY KEY",
+        "store_id": "INTEGER REFERENCES stores(id) ON DELETE CASCADE",
+        "name": "VARCHAR(100) NOT NULL",
+        "price": "NUMERIC(12,2) NOT NULL",
+        "category": "VARCHAR(50)",
+        "status": "VARCHAR(20) DEFAULT 'active'",  # 'active', 'inactive'
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    },
+    "suppliers": {
+        "id": "SERIAL PRIMARY KEY",
+        "name": "VARCHAR(100) NOT NULL",
+        "phone_number": "VARCHAR(13) NOT NULL",
+        "address": "TEXT",
+        "status": "VARCHAR(20) DEFAULT 'active'",  # 'active', 'inactive'
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    },
+    "product_suppliers": {
+        "id": "SERIAL PRIMARY KEY",
+        "product_id": "INTEGER REFERENCES products(id) ON DELETE CASCADE",
+        "supplier_id": "INTEGER REFERENCES suppliers(id) ON DELETE CASCADE",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    },
+    "warehouse": {
+        "id": "SERIAL PRIMARY KEY",
+        "location": "VARCHAR(100) NOT NULL",
+        "store_id": "INTEGER REFERENCES stores(id) ON DELETE CASCADE",
+        "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    },
+    "stocks": {
+        "id": "SERIAL PRIMARY KEY",
+        "warehouse_id": "INTEGER REFERENCES warehouse(id) ON DELETE CASCADE",
+        "product_id": "INTEGER REFERENCES products(id) ON DELETE CASCADE",
+        "supplier_id": "INTEGER REFERENCES suppliers(id) ON DELETE CASCADE",
+        "store_id": "INTEGER REFERENCES stores(id) ON DELETE CASCADE",
+        "quantity": "INTEGER DEFAULT 0",
+        "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    },
+    "reports": {
+        "id": "SERIAL PRIMARY KEY",
+        "store_id": "INTEGER REFERENCES stores(id) ON DELETE CASCADE",
+        "product_id": "INTEGER REFERENCES products(id) ON DELETE CASCADE",
+        "quantity_change": "INTEGER NOT NULL",
+        "type": "VARCHAR(10) NOT NULL", # 'in', 'out'
+        "reason": "TEXT",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    },
+    "orders": {
+        "id": "SERIAL PRIMARY KEY",
+        "store_id": "INTEGER REFERENCES stores(id) ON DELETE CASCADE",
+        "total_price": "NUMERIC(12,2) NOT NULL",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    },
+    "detail_order": {
+        "id": "SERIAL PRIMARY KEY",
+        "order_id": "INTEGER REFERENCES orders(id) ON DELETE CASCADE",
+        "product_id": "INTEGER REFERENCES products(id) ON DELETE CASCADE",
+        "quantity": "INTEGER NOT NULL",
+        "total": "NUMERIC(12,2) NOT NULL"
+    },
+    "transactions": {
+        "id": "SERIAL PRIMARY KEY",
+        "order_id": "INTEGER REFERENCES orders(id) ON DELETE CASCADE",
+        "payment_method": "VARCHAR(20)",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    }
+}
