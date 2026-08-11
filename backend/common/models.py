@@ -19,7 +19,7 @@ TABLE_SCHEMAS = {
         "name": "VARCHAR(100) NOT NULL",
         "email": "VARCHAR(100) UNIQUE NOT NULL",
         "password": "VARCHAR(255) NOT NULL",
-        "role": "VARCHAR(50) NOT NULL",  # 'Super Admin', 'Admin', 'kasir', 'Stok'
+        "role": "VARCHAR(50) NOT NULL",  # 'Super Admin', 'Admin', 'Kasir', 'Stok'
         "store_id": "INTEGER REFERENCES stores(id) ON DELETE CASCADE",
         "status": "VARCHAR(20) DEFAULT 'active'",  # 'active', 'inactive'
         "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
