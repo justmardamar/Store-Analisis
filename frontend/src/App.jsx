@@ -1,5 +1,7 @@
 import {Routes,Route,BrowserRouter} from 'react-router-dom'
 import Login from './templates/auth/Login'
+import Dashboard from './templates/dashboard/Dashboard'
+
 import CreateProduct from './templates/admin/product/CreateProduct'
 import ListTransaction from './templates/admin/transaction/ListTransaction'
 import DetailTransaction from './templates/admin/transaction/DetailTransaction'
@@ -8,11 +10,15 @@ import CreateStore from './templates/superAdmin/store/CreateStore'
 import EditStore from './templates/superAdmin/store/EditStore'
 import ShowStore from './templates/superAdmin/store/ShowStore'
 import CreateUser from './templates/superAdmin/user/CreateUser'
+import SetLocation from './templates/stock/NewStock/SetLocation'
+
+import ChangeStock from './templates/stock/NewStock/ChangeStock'
 
 import ShowTransaction from './templates/kasir/transaction/ShowTransaction'
 import CreateTransaction from './templates/kasir/transaction/CreateTransaction'
 import UpdateStockData from './templates/stock/NewStock/UpdateStockData'
-import AddWarehouse from './templates/stock/NewStock/AddWarehouse'
+import AddWarehouse from './templates/stock/warehouse/AddWarehouse'
+
 
 function App() {
 
