@@ -100,7 +100,7 @@ def update_store(id):
 
 @app.route('/api/superAdmin/user/create', methods=['POST'])
 @login_required
-def create_user_admin():
+def create_user_superAdmin():
     data = request.get_json() or {}
     name = data.get('name')
     email = data.get('email')
