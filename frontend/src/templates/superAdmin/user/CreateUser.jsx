@@ -6,7 +6,6 @@ export default function CreateUser(){
         name : "",
         email : "",
         password : "",
-        role : "",
         store_id : ""
     })
 
@@ -31,14 +30,13 @@ export default function CreateUser(){
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        const response = await axios.post('http://localhost:5000/api/user/create',user)
+        const response = await axios.post('http://localhost:5000/api/superAdmin/user/create',user)
         if(response.status === 200){
             alert("User berhasil ditambahkan")
             setUser({
                 name : "",
                 email : "",
                 password : "",
-                role : "",
                 store_id : ""
             })
         }

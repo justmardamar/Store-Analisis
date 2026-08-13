@@ -98,9 +98,9 @@ def update_store(id):
         )
     return jsonify({"message": "Store updated successfully"})
 
-@app.route('/api/user/create', methods=['POST'])
+@app.route('/api/superAdmin/user/create', methods=['POST'])
 @login_required
-def create_user_admin():
+def create_user_superAdmin():
     data = request.get_json() or {}
     name = data.get('name')
     email = data.get('email')
@@ -119,6 +119,27 @@ def create_user_admin():
         )
     return jsonify({"message": "User created successfully"})
 
+@app.route('/api/admin/user/create', methods=['POST'])
+@login_required
+def create_user_admin():
+    data = request.get_json() or {}
+    name = data.get('name')
+    email = data.get('email')
+    password = data.get('password')
+    role = data.get('role')
+    store_id = session.get('store_id')
+
+    if not name or not email or not password:
+        return jsonify({"message": "Nama, email, dan password wajib diisi"}), 400
+
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+    with get_db_cursor(commit=True) as cursor:
+        cursor.execute(
+            "INSERT INTO users (name, email, password, store_id, role) VALUES (%s, %s, %s, %s, %s)",
+            (name, email, hashed_password, store_id, role)
+        )
+    return jsonify({"message": "User created successfully"})
 
 # ================= ================= =================
 # PRODUCT & SUPPLIER MANAGEMENT
