@@ -1,26 +1,35 @@
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
-from common.database import db_session
-from common.models import Product
+from backend.database import get_db_cursor
 
 def createProduct():
     try:
-        product = Product(#tambahin store id
-            store_id="[Store_id]",
-            name="Biskuit",
-            price=10000,
-            category="Makanan",
-        )
-        db_session.add(product)
-        db_session.commit()
-        print(f"Product '{product.name}' berhasil dibuat!")
+        # find a store id to associate the product with
+        with get_db_cursor() as cursor:
+            cursor.execute("SELECT id FROM stores ORDER BY id DESC LIMIT 1")
+            row = cursor.fetchone()
+            if not row:
+                print("No store found. Run CreateStore.py first.")
+                return
+            store_id = row.get('id')
+
+        with get_db_cursor(commit=True) as cursor:
+            cursor.execute(
+                """
+                INSERT INTO products (store_id, name, price, category)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id, name
+                """,
+                (store_id, "Biskuit", 10000, "Makanan"),
+            )
+            row = cursor.fetchone()
+            name = row.get('name') if row else 'Biskuit'
+            print(f"Product '{name}' berhasil dibuat!")
     except Exception as e:
-        db_session.rollback()
         print(f"Terjadi kesalahan saat seeding: {e}")
-    finally:
-        db_session.remove()
+
 
 if __name__ == '__main__':
     createProduct()

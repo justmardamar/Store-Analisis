@@ -4,7 +4,7 @@ import os
 # Menambahkan parent directory ke sys.path agar import 'common' bekerja dengan baik
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from common.database import get_db_cursor
+from database import get_db_cursor
 
 CREATE_TABLES_SQL = """
 -- 1. STORES
