@@ -10,10 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@untitledui/icons": "^0.0.22",
     "axios": "^1.18.1",
     "react": "^19.2.7",
+    "react-aria": "^3.51.0",
+    "react-aria-components": "^1.20.0",
     "react-dom": "^19.2.7",
-    "react-router-dom": "^7.18.1"
+    "react-router-dom": "^7.18.1",
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
