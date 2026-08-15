@@ -5,7 +5,7 @@ import bcrypt
 
 from config import SECRET_KEY
 from middleware.LoginAuth import login_required
-from common.database import get_db_cursor
+from backend.database import get_db_cursor
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
