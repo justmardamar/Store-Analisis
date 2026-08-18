@@ -7,6 +7,8 @@ import LoginAuthRoute from './components/LoginAuthRoute'
 import CreateProduct from './templates/admin/product/CreateProduct'
 import ListTransaction from './templates/admin/transaction/ListTransaction'
 import DetailTransaction from './templates/admin/transaction/DetailTransaction'
+import CreateUser from './templates/admin/user/CreateUser'
+import CreateDataStock from './templates/stock/NewStock/CreateDataStock'
 
 import CreateStore from './templates/superAdmin/store/CreateStore'
 import EditStore from './templates/superAdmin/store/EditStore'
@@ -23,6 +25,7 @@ import SetLocation from './templates/stock/NewStock/SetLocation'
 import ChangeStock from './templates/stock/NewStock/ChangeStock'
 import UpdateStockData from './templates/stock/NewStock/UpdateStockData'
 import AddWarehouse from './templates/stock/warehouse/AddWarehouse'
+import Warehouses from './templates/stock/warehouse/Warehouses'
 
 
 function App() {
@@ -39,9 +42,12 @@ function App() {
           {/* Halaman yang diproteksi (wajib login) */}
           <Route element={<LoginAuthRoute/>}>
             <Route path="/" element={<Dashboard />} />
+
             <Route path="/admin/createProduct" element={<CreateProduct />} />
             <Route path="/admin/transaction" element={<ListTransaction />} />
             <Route path="/admin/transaction/:id" element={<DetailTransaction />} />
+            <Route path="/admin/createUser" element={<CreateUser />} />
+            <Route path="/stock/createDataStock" element={<CreateDataStock />} />
 
             <Route path='/superAdmin/createStore' element={<CreateStore/>} />
             <Route path='/superAdmin/editStore/:id' element={<EditStore/>} />
@@ -50,13 +56,13 @@ function App() {
             <Route path='/superAdmin/showSupplier' element={<ShowSupplier/>} />
             <Route path='/superAdmin/createSupplier' element={<CreateSupplier/>} />
 
-
             <Route path='/kasir/transaction' element={<ShowTransaction/>} />
             <Route path='/kasir/transaction/create' element={<CreateTransaction/>} />
 
             <Route path='/stock/data-location' element={<UpdateStockData/>} />
             <Route path='/stock/change' element={<ChangeStock/>} />
             <Route path='/stock/set-location/:id' element={<SetLocation/>} />
+            <Route path='/stock/warehouses' element={<Warehouses/>} />
             <Route path='/stock/add-warehouse' element={<AddWarehouse/>} />
           </Route>
         </Routes>
