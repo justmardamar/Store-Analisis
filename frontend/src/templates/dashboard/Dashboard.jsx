@@ -1,21 +1,35 @@
-import Sidebar from '../../components/Sidebar';
-
 export default function Dashboard() {
   const role = localStorage.getItem('role');
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f9fafb' }}>
-      <Sidebar />
-
-      <main style={{ flex: 1, padding: '32px 40px', color: '#374151' }}>
-        <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#6b7280', marginBottom: '8px' }}>
-          Role : {role}
+    <div className="min-h-screen bg-slate-50 px-5 py-7 sm:px-8 lg:px-10 lg:py-10">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-9 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Overview</p>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Good morning, {role}</h1>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">Pantau operasional toko dan kelola aktivitas harian dari satu tempat.</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500">Today · Store operations</div>
         </div>
-        <h1 style={{ margin: 0, color: '#111827', fontSize: '32px' }}>{role}</h1>
-        <p style={{ marginTop: '12px', color: '#6b7280', fontSize: '16px' }}>
-          Selamat datang di dashboard. Menu di samping menyesuaikan peran pengguna saat ini.
-        </p>
-      </main>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {[
+            ['Active products', '128', '+12% this month'],
+            ['Today’s transactions', '42', '+8.4% from yesterday'],
+            ['Low stock items', '07', 'Needs attention'],
+          ].map(([label, value, note], index) => (
+            <div className="surface p-5" key={label}>
+              <div className="mb-5 flex items-center justify-between"><span className="text-sm font-medium text-slate-500">{label}</span><span className={`h-2 w-2 rounded-full ${index === 2 ? 'bg-amber-500' : 'bg-teal-600'}`} /></div>
+              <div className="text-3xl font-bold tracking-tight text-slate-900">{value}</div>
+              <div className="mt-2 text-xs font-medium text-slate-500">{note}</div>
+            </div>
+          ))}
+        </div>
+        <div className="surface mt-5 p-6">
+          <p className="text-sm font-semibold text-slate-900">Quick start</p>
+          <p className="mt-1 text-sm text-slate-500">Choose an item from the navigation to continue managing your store.</p>
+        </div>
+      </div>
       {role === 'Super Admin' && (
         <div style={{ position: 'fixed', bottom: '16px', right: '16px', background: '#f9fafb', padding: '12px 16px', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)' }}>
           <a href="/superAdmin/createStore" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}>

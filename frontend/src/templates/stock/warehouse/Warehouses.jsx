@@ -1,5 +1,4 @@
 import {useState, useEffect} from 'react'
-import Link from 'react-router-dom'
 
 export default function Warehouses(){
     const [warehouses, setWarehouses] = useState([])

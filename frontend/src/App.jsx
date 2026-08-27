@@ -3,6 +3,7 @@ import Login from './templates/auth/Login'
 import Dashboard from './templates/dashboard/Dashboard'
 
 import LoginAuthRoute from './components/LoginAuthRoute'
+import AppShell from './components/AppShell'
 
 import CreateProduct from './templates/admin/product/CreateProduct'
 import ListTransaction from './templates/admin/transaction/ListTransaction'
@@ -31,7 +32,7 @@ import Warehouses from './templates/stock/warehouse/Warehouses'
 function App() {
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px' }}>
+    <div>
       <BrowserRouter>
         {/* Commented out Navbar and Footer because they are not defined yet */}
         {/* <Navbar /> */}
@@ -41,6 +42,7 @@ function App() {
 
           {/* Halaman yang diproteksi (wajib login) */}
           <Route element={<LoginAuthRoute/>}>
+            <Route element={<AppShell />}>
             <Route path="/" element={<Dashboard />} />
 
             <Route path="/admin/createProduct" element={<CreateProduct />} />
@@ -64,6 +66,7 @@ function App() {
             <Route path='/stock/set-location/:id' element={<SetLocation/>} />
             <Route path='/stock/warehouses' element={<Warehouses/>} />
             <Route path='/stock/add-warehouse' element={<AddWarehouse/>} />
+            </Route>
           </Route>
         </Routes>
         {/* <Footer /> */}

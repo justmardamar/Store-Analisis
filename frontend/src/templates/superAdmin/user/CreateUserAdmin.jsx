@@ -22,7 +22,7 @@ export default function CreateUserAdmin(){
     const getStores = async () => {
         const response = await axios.get('http://localhost:5000/api/store')
         if(response.status === 200){
-            setStores(response)
+            setStores(response.data.stores)
         }
         console.log(stores)
     }

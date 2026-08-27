@@ -6,7 +6,7 @@ export default function ShowSupplier(){
 
     const fetchSupplier = async () => {
         const response = await axios.get('http://localhost:5000/api/supplier')
-        setSupplier(response.data)
+        setSupplier(response.data.suppliers)
     }
 
     useEffect(() => {
