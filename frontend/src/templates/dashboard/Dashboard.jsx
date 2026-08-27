@@ -46,7 +46,7 @@ export default function Dashboard() {
           <a href="/admin/createUser" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '500', marginLeft: '16px' }}>
             Create User 
           </a>
-          <a href="/stock/createDataStock" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '500', marginLeft: '16px' }}>
+          <a href="/admin/createDataStock" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '500', marginLeft: '16px' }}>
             Create Data Stock
           </a>
           <a href="/stock/data-location" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '500', marginLeft: '16px' }}>
@@ -54,7 +54,7 @@ export default function Dashboard() {
           </a>
         </div>
       )}
-      {role === "Kasir" && (
+      {role === "kasir" && (
         <div style={{ position: 'fixed', bottom: '16px', right: '16px', background: '#f9fafb', padding: '12px 16px', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)' }}>
           <a href="/kasir/transaction" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}>
             Show Transaction
@@ -66,7 +66,7 @@ export default function Dashboard() {
       )}
       {role === "Stock" && (
         <div style={{ position: 'fixed', bottom: '16px', right: '16px', background: '#f9fafb', padding: '12px 16px', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)' }}>
-          <a href="/stock/createDataStock" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}>
+          <a href="/admin/createDataStock" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}>
             Create Data Stock
           </a>
           <a href="/stock/data-location" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '500', marginLeft: '16px' }}>

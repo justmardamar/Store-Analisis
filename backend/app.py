@@ -411,4 +411,4 @@ def set_warehouse(stock_id):
     return jsonify({"message": "Lokasi gudang berhasil diperbarui"})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000,debug=True)

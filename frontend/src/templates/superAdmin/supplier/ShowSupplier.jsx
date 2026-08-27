@@ -15,7 +15,7 @@ export default function ShowSupplier(){
 
     return(
         <div className="">
-            <a href="/super-admin/supplier/create" className="btn btn-primary">Tambah Supplier</a>
+            <a href="/superAdmin/createSupplier" className="btn btn-primary">Tambah Supplier</a>
             <table>
                 <thead>
                     <tr>

@@ -8,12 +8,12 @@ import CreateProduct from './templates/admin/product/CreateProduct'
 import ListTransaction from './templates/admin/transaction/ListTransaction'
 import DetailTransaction from './templates/admin/transaction/DetailTransaction'
 import CreateUser from './templates/admin/user/CreateUser'
-import CreateDataStock from './templates/stock/NewStock/CreateDataStock'
+import CreateDataStock from './templates/admin/stocks/CreateDataStock'
 
 import CreateStore from './templates/superAdmin/store/CreateStore'
 import EditStore from './templates/superAdmin/store/EditStore'
 import ShowStore from './templates/superAdmin/store/ShowStore'
-import CreateUser from './templates/superAdmin/user/CreateUser'
+import CreateUserAdmin from './templates/superAdmin/user/CreateUserAdmin'
 import ShowSupplier from './templates/superAdmin/supplier/ShowSupplier'
 import CreateSupplier from './templates/superAdmin/supplier/CreateSupplier'
 
@@ -47,12 +47,12 @@ function App() {
             <Route path="/admin/transaction" element={<ListTransaction />} />
             <Route path="/admin/transaction/:id" element={<DetailTransaction />} />
             <Route path="/admin/createUser" element={<CreateUser />} />
-            <Route path="/stock/createDataStock" element={<CreateDataStock />} />
+            <Route path="/admin/createDataStock" element={<CreateDataStock />} />
 
             <Route path='/superAdmin/createStore' element={<CreateStore/>} />
             <Route path='/superAdmin/editStore/:id' element={<EditStore/>} />
             <Route path='/superAdmin/showStore' element={<ShowStore/>} />
-            <Route path='/superAdmin/createUser' element={<CreateUser/>} />
+            <Route path='/superAdmin/createUser' element={<CreateUserAdmin/>} />
             <Route path='/superAdmin/showSupplier' element={<ShowSupplier/>} />
             <Route path='/superAdmin/createSupplier' element={<CreateSupplier/>} />
 

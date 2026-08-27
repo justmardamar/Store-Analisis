@@ -22,25 +22,23 @@ export default function Login(){
         console.log(res)
         if(res.data.isLoggedIn){
             if(res.data.role === 'Super Admin'){
-                localStorage.setItem('isLoggedIn', true)
+                localStorage.setItem('token', true)
                 localStorage.setItem('role', 'Super Admin')
-                navigate('/superAdmin/createStore')
+                
             }
             if(res.data.role === 'Admin'){
-                localStorage.setItem('isLoggedIn', true)
+                localStorage.setItem('token', true)
                 localStorage.setItem('role', 'Admin')
-                navigate('/admin/createProduct')
             }
             if(res.data.role === 'kasir'){
-                localStorage.setItem('isLoggedIn', true)
+                localStorage.setItem('token', true)
                 localStorage.setItem('role', 'kasir')
-                navigate('/kasir/createTransaction')
             }
             if(res.data.role === 'Stock'){
-                localStorage.setItem('isLoggedIn', true)
+                localStorage.setItem('token', true)
                 localStorage.setItem('role', 'Stock')
-                navigate('/ ')
             }
+            navigate('/dashboard')
         }else{
             console.log("Login failed")
         }

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState,useEffect } from "react";
 
-export default function CreateUser(){
+export default function CreateUserAdmin(){
     const [user,setUser] = useState({
         name : "",
         email : "",
