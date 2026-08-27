@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState,useEffect } from "react";
 
-export default function CreateUser(){
+export default function CreateUserAdmin(){
     const [user,setUser] = useState({
         name : "",
         email : "",
@@ -22,7 +22,7 @@ export default function CreateUser(){
     const getStores = async () => {
         const response = await axios.get('http://localhost:5000/api/store')
         if(response.status === 200){
-            setStores(response)
+            setStores(response.data.stores)
         }
         console.log(stores)
     }

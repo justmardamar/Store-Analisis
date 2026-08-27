@@ -9,8 +9,14 @@ from database import get_db_cursor
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
-CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
-
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:5173", "http://localhost:3000"],
+        "supports_credentials": True,
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 # ================= ================= =================
 # AUTHENTICATION
 # ================= ================= =================
@@ -49,7 +55,7 @@ def login():
 @login_required
 def get_stores():
     with get_db_cursor(commit=False) as cursor:
-        cursor.execute("SELECT id, name, address, status FROM stores ORDER BY id ASC")
+        cursor.execute("SELECT id, name, address FROM stores ORDER BY id ASC")
         stores = cursor.fetchall()
     return jsonify({"stores": stores})
 
@@ -411,4 +417,4 @@ def set_warehouse(stock_id):
     return jsonify({"message": "Lokasi gudang berhasil diperbarui"})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0',port=5000,debug=True)

@@ -6,12 +6,12 @@ export default function ShowStore(){
 
     const fetchData = async () => {
         const response = await axios.get('http://localhost:5000/api/store')
-        setStores(response.data)
+        setStores(response.data.stores)
     }
 
     useEffect(() => {
         fetchData()
-    })
+    }, [])
 
     return(
         <div className="">
@@ -28,7 +28,7 @@ export default function ShowStore(){
                     </tr>
                 </thead>
                 <tbody>
-                    {stores.map((store) => (
+                    {stores?.map((store) => (
                         <tr key={store.id}>
                             <td>{store.id}</td>
                             <td>{store.name}</td>

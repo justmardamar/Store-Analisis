@@ -6,7 +6,7 @@ export default function ShowSupplier(){
 
     const fetchSupplier = async () => {
         const response = await axios.get('http://localhost:5000/api/supplier')
-        setSupplier(response.data)
+        setSupplier(response.data.suppliers)
     }
 
     useEffect(() => {
@@ -15,7 +15,7 @@ export default function ShowSupplier(){
 
     return(
         <div className="">
-            <a href="/super-admin/supplier/create" className="btn btn-primary">Tambah Supplier</a>
+            <a href="/superAdmin/createSupplier" className="btn btn-primary">Tambah Supplier</a>
             <table>
                 <thead>
                     <tr>

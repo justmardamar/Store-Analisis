@@ -18,7 +18,7 @@ def seed_super_admin():
                 VALUES (%s, %s, %s, %s, %s)
                 RETURNING id, name
                 """,
-                ("super admin", "superadmin@gmail.com", hashed_password, "Admin", None),
+                ("super admin", "superadmin@gmail.com", hashed_password, "Super Admin", None),
             )
             row = cursor.fetchone()
             name = row.get('name') if row else 'super admin'

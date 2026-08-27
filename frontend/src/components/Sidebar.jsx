@@ -30,66 +30,26 @@ export default function Sidebar() {
   const menuItems = roleMenus[role] || roleMenus.Admin;
 
   return (
-    <aside
-      style={{
-        width: '250px',
-        minHeight: '100vh',
-        background: '#ffffff',
-        borderRight: '1px solid #e5e7eb',
-        padding: '24px 18px',
-        boxSizing: 'border-box',
-      }}
-    >
-      <div style={{ marginBottom: '28px', padding: '10px 12px' }}>
-        <div
-          style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '12px',
-            background: '#f3f4f6',
-            color: '#4b5563',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 700,
-            marginBottom: '12px',
-          }}
-        >
-          {role.charAt(0).toUpperCase()}
+    <aside className="w-full shrink-0 border-b border-slate-200 bg-white px-5 py-5 lg:min-h-screen lg:w-64 lg:border-b-0 lg:border-r lg:px-4 lg:py-7">
+      <div className="mb-8 flex items-center gap-3 px-2 lg:block">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-700 text-lg font-bold text-white shadow-sm">
+          S
         </div>
-        <div style={{ color: '#111827', fontSize: '17px', fontWeight: 700 }}>{role}</div>
-        <div style={{ color: '#6b7280', fontSize: '12px', marginTop: '4px' }}>Menu utama</div>
+        <div className="lg:mt-4">
+          <div className="text-base font-bold tracking-tight text-slate-900">Storewise</div>
+          <div className="mt-0.5 text-xs text-slate-500">{role} workspace</div>
+        </div>
       </div>
 
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <nav className="flex gap-1 overflow-x-auto lg:flex-col">
         {menuItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.to === '/'}
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '10px 12px',
-              borderRadius: '10px',
-              textDecoration: 'none',
-              fontSize: '14px',
-              fontWeight: isActive ? 600 : 500,
-              color: isActive ? '#111827' : '#6b7280',
-              background: isActive ? '#f3f4f6' : 'transparent',
-              transition: 'all 0.2s ease',
-            })}
+            className={({ isActive }) => `flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${isActive ? 'bg-teal-50 font-semibold text-teal-800' : 'font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
           >
-            <span
-              style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                background: '#9ca3af',
-                display: 'inline-block',
-              }}
-            />
+            <span className="h-1.5 w-1.5 rounded-full bg-current opacity-60" />
             {item.label}
           </NavLink>
         ))}
