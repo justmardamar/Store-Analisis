@@ -147,6 +147,53 @@ def create_user_admin():
         )
     return jsonify({"message": "User created successfully"})
 
+@app.route('/api/admin/user', methods=['GET'])
+@login_required
+def get_users():
+    store_id = session.get('store_id')
+    with get_db_cursor(commit=False) as cursor:
+        cursor.execute(
+            "SELECT id, name, email, role FROM users WHERE store_id = %s ORDER BY id ASC",
+            (store_id,)
+        )
+        users = cursor.fetchall()
+    return jsonify({"users": users})
+
+@app.route('/api/admin/user/<int:id>', methods=['GET'])
+@login_required
+def get_user(id):
+    store_id = session.get('store_id')
+    with get_db_cursor(commit=False) as cursor:
+        cursor.execute(
+            "SELECT id, name, email, role FROM users WHERE id = %s AND store_id = %s",
+            (id, store_id)
+        )
+        user = cursor.fetchone()
+
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    return jsonify({"user": user})
+
+@app.route('/api/admin/editUser/<int:id>', methods=['PUT'])
+@login_required
+def edit_user(id):
+    data = request.get_json() or {}
+    name = data.get('name')
+    email = data.get('email')
+    role = data.get('role')
+    store_id = session.get('store_id')
+
+    if not name or not email or not role:
+        return jsonify({"message": "Nama, email, and role wajib diisi"}), 400
+
+    with get_db_cursor(commit=True) as cursor:
+        cursor.execute(
+            "UPDATE users SET name = %s, email = %s, role = %s WHERE id = %s AND store_id = %s",
+            (name, email, role, id, store_id)
+        )
+    return jsonify({"message": "User updated successfully"})
+
 # ================= ================= =================
 # PRODUCT & SUPPLIER MANAGEMENT
 # ================= ================= =================
@@ -187,6 +234,44 @@ def create_product():
             (name, price, category, store_id)
         )
     return jsonify({"message": "Product created successfully"})
+
+@app.route('/api/product/<int:id>', methods=['GET'])
+@login_required
+def get_product(id):
+    store_id = session.get('store_id')
+    with get_db_cursor(commit=False) as cursor:
+        cursor.execute(
+            "SELECT id, name, price, category FROM products WHERE id = %s AND store_id = %s",
+            (id, store_id)
+        )
+        product = cursor.fetchone()
+
+    if not product:
+        return jsonify({"message": "Product not found"}), 404
+
+    if 'price' in product and product['price'] is not None:
+        product['price'] = float(product['price'])
+
+    return jsonify({"product": product})
+
+@app.route('/api/product/update/<int:id>', methods=['PUT'])
+@login_required
+def update_product(id):
+    data = request.get_json() or {}
+    name = data.get('name')
+    price = data.get('price')
+    category = data.get('category')
+    store_id = session.get('store_id')
+
+    if not name or price is None:
+        return jsonify({"message": "Nama produk dan harga wajib diisi"}), 400
+
+    with get_db_cursor(commit=True) as cursor:
+        cursor.execute(
+            "UPDATE products SET name = %s, price = %s, category = %s WHERE id = %s AND store_id = %s",
+            (name, price, category, id, store_id)
+        )
+    return jsonify({"message": "Product updated successfully"})
 
 @app.route('/api/supplier', methods=['GET'])
 @login_required

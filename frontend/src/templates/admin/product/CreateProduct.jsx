@@ -19,6 +19,10 @@ export default function CreateProduct(){
 
     const handleSubmit = (e) =>{
         e.preventDefault()
+        if(product.name === "" || product.price === "" || product.category === ""){
+            alert("Semua field harus diisi")
+            return
+        }
         const res = axios.post('http://localhost:5000/api/product/create',{
             name : product.name,
             price : product.price,
@@ -40,7 +44,12 @@ export default function CreateProduct(){
                 <label htmlFor="">Harga</label>
                 <input type="text" value={product.price} onChange={handleChange} name="price" />
                 <label htmlFor="">Kategori</label>
-                <input type="text" value={product.category} onChange={handleChange} name="category" />
+                <select name="category" value={product.category} onChange={handleChange}>
+                    <option value="">Pilih Kategori</option>
+                    <option value="Makanan">Makanan</option>
+                    <option value="Minuman">Minuman</option>
+                    <option value="Snack">Snack</option>
+                </select>
                 <button type="submit">Buat</button>
             </form>
         </div>
