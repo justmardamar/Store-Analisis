@@ -4,8 +4,8 @@ import { useEffect, useState } from "react"
 export default function ListTransaction(){
     const [transactions,setTransactions] = useState([])
 
-    const fetchData = () => {
-        const response = axios.get('http://localhost:5000/api/transactions')
+    const fetchData = async () => {
+        const response = await axios.get('http://localhost:5000/api/transactions')
         setTransactions(response.data.transactions)
     }
 
