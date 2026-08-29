@@ -6,9 +6,11 @@ import LoginAuthRoute from './components/LoginAuthRoute'
 import AppShell from './components/AppShell'
 
 import CreateProduct from './templates/admin/product/CreateProduct'
+import EditProduct from './templates/admin/product/EditProduct'
 import ListTransaction from './templates/admin/transaction/ListTransaction'
 import DetailTransaction from './templates/admin/transaction/DetailTransaction'
 import CreateUser from './templates/admin/user/CreateUser'
+import EditUser from './templates/admin/user/EditUser'
 import CreateDataStock from './templates/admin/stocks/CreateDataStock'
 import ListProduct from './templates/admin/product/ListProduct'
 import ListUser from './templates/admin/user/ListUser'
@@ -48,9 +50,11 @@ function App() {
             <Route path="/" element={<Dashboard />} />
 
             <Route path="/admin/createProduct" element={<CreateProduct />} />
+            <Route path="/admin/editProduct/:id" element={<EditProduct />} />
             <Route path="/admin/transaction" element={<ListTransaction />} />
             <Route path="/admin/transaction/:id" element={<DetailTransaction />} />
             <Route path="/admin/createUser" element={<CreateUser />} />
+            <Route path="/admin/editUser/:id" element={<EditUser />} />
             <Route path="/admin/createDataStock" element={<CreateDataStock />} />
             <Route path="/admin/listProduct" element={<ListProduct />} />
             <Route path="/admin/listUser" element={<ListUser />} />
