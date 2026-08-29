@@ -21,23 +21,9 @@ export default function Login(){
         const res = await axios.post("http://localhost:5000/api/login",login)
         console.log(res)
         if(res.data.isLoggedIn){
-            if(res.data.role === 'Super Admin'){
-                localStorage.setItem('token', true)
-                localStorage.setItem('role', 'Super Admin')
-                
-            }
-            if(res.data.role === 'Admin'){
-                localStorage.setItem('token', true)
-                localStorage.setItem('role', 'Admin')
-            }
-            if(res.data.role === 'kasir'){
-                localStorage.setItem('token', true)
-                localStorage.setItem('role', 'kasir')
-            }
-            if(res.data.role === 'Stock'){
-                localStorage.setItem('token', true)
-                localStorage.setItem('role', 'Stock')
-            }
+            localStorage.setItem('username', res.data.username)
+            localStorage.setItem('role', res.data.role)
+            localStorage.setItem('store_id', res.data.store_id)
             navigate('/')
         }else{
             console.log("Login failed")

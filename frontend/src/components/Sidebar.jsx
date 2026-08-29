@@ -7,17 +7,17 @@ const roleMenus = {
     { label: 'Supplier', to: '/superAdmin/showSupplier' },
     { label: 'Pengguna', to: '/superAdmin/createUser' },
   ],
-  Admin: [
+  'Admin': [
     { label: 'Dashboard', to: '/' },
     { label: 'Produk', to: '/admin/createProduct' },
     { label: 'Transaksi', to: '/admin/transaction' },
   ],
-  kasir: [
+  'kasir': [
     { label: 'Dashboard', to: '/' },
     { label: 'Transaksi', to: '/kasir/transaction' },
     { label: 'Buat Transaksi', to: '/kasir/transaction/create' },
   ],
-  Stock: [
+  'Stock': [
     { label: 'Dashboard', to: '/' },
     { label: 'Stock', to: '/stock/data-location' },
     { label: 'Gudang', to: '/stock/add-warehouse' },
