@@ -204,7 +204,7 @@ def get_products():
     store_id = session.get('store_id')
     with get_db_cursor(commit=False) as cursor:
         cursor.execute(
-            "SELECT id, name, price, category FROM products WHERE store_id = %s ORDER BY id ASC",
+            "SELECT id, name, price, category,status FROM products WHERE store_id = %s ORDER BY id ASC",
             (store_id,)
         )
         products = cursor.fetchall()
