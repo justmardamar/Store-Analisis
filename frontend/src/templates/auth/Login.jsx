@@ -21,6 +21,7 @@ export default function Login(){
         const res = await axios.post("http://localhost:5000/api/login",login)
         console.log(res)
         if(res.data.isLoggedIn){
+            localStorage.setItem('isLoggedIn', true)
             localStorage.setItem('username', res.data.username)
             localStorage.setItem('role', res.data.role)
             localStorage.setItem('store_id', res.data.store_id)

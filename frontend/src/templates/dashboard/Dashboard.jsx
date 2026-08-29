@@ -1,5 +1,17 @@
+
+
 export default function Dashboard() {
+  
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
+  
+  const checkLoginStatus = () => {
+    if (!isLoggedIn) {
+      window.location.href = '/login';
+    }
+  }
+
   const role = localStorage.getItem('role');
+  const username = localStorage.getItem('username');
 
   return (
     <div className="min-h-screen bg-slate-50 px-5 py-7 sm:px-8 lg:px-10 lg:py-10">
@@ -7,7 +19,7 @@ export default function Dashboard() {
         <div className="mb-9 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Overview</p>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Good morning, {role}</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Good morning, {username}</h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">Pantau operasional toko dan kelola aktivitas harian dari satu tempat.</p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500">Today · Store operations</div>
