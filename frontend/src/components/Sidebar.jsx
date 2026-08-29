@@ -9,8 +9,10 @@ const roleMenus = {
   ],
   'Admin': [
     { label: 'Dashboard', to: '/' },
-    { label: 'Produk', to: '/admin/createProduct' },
+    { label: 'Produk', to: '/admin/listProduct' },
     { label: 'Transaksi', to: '/admin/transaction' },
+    { label: 'User', to: '/admin/listUser' },
+    { label: 'Alokasi Stok', to: '/admin/createDataStock' },
   ],
   'kasir': [
     { label: 'Dashboard', to: '/' },
@@ -20,7 +22,7 @@ const roleMenus = {
   'Stock': [
     { label: 'Dashboard', to: '/' },
     { label: 'Stock', to: '/stock/data-location' },
-    { label: 'Gudang', to: '/stock/add-warehouse' },
+    { label: 'Gudang', to: '/stock/warehouses' },
     { label: 'Perubahan Stok', to: '/stock/change' },
   ],
 };
