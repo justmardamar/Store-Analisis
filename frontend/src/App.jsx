@@ -10,6 +10,8 @@ import ListTransaction from './templates/admin/transaction/ListTransaction'
 import DetailTransaction from './templates/admin/transaction/DetailTransaction'
 import CreateUser from './templates/admin/user/CreateUser'
 import CreateDataStock from './templates/admin/stocks/CreateDataStock'
+import ListProduct from './templates/admin/product/ListProduct'
+import ListUser from './templates/admin/user/ListUser'
 
 import CreateStore from './templates/superAdmin/store/CreateStore'
 import EditStore from './templates/superAdmin/store/EditStore'
@@ -50,6 +52,8 @@ function App() {
             <Route path="/admin/transaction/:id" element={<DetailTransaction />} />
             <Route path="/admin/createUser" element={<CreateUser />} />
             <Route path="/admin/createDataStock" element={<CreateDataStock />} />
+            <Route path="/admin/listProduct" element={<ListProduct />} />
+            <Route path="/admin/listUser" element={<ListUser />} />
 
             <Route path='/superAdmin/createStore' element={<CreateStore/>} />
             <Route path='/superAdmin/editStore/:id' element={<EditStore/>} />

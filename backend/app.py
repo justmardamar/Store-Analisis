@@ -42,7 +42,7 @@ def login():
         session['username'] = user['name']
         session['role'] = user['role']
         session['store_id'] = user['store_id']
-        return jsonify({"isLoggedIn": True, "role": user['role']})
+        return jsonify({"isLoggedIn": True, "role": user['role'], "username" : user['name']})
 
     return jsonify({"isLoggedIn": False, "message": "Email atau password salah"}), 401
 
