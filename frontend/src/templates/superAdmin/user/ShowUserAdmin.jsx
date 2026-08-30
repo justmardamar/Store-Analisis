@@ -1,31 +1,31 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import axios from 'axios'
+import { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
+import axios from "axios"
 
-export default function ShowStore() {
-    const [stores, setStores] = useState([])
+export default function ShowUserAdmin() {
+    const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
 
-    const fetchData = async () => {
+    const fetchUser = async () => {
         try {
             setLoading(true)
-            const response = await axios.get('http://localhost:5000/api/store')
-            setStores(response.data.stores || [])
+            const response = await axios.get('http://localhost:5000/api/superAdmin/user')
+            setUsers(response.data.users || [])
         } catch (error) {
-            console.error('Error fetching stores:', error)
+            console.error('Error fetching admin users:', error)
         } finally {
             setLoading(false)
         }
     }
 
     useEffect(() => {
-        fetchData()
+        fetchUser()
     }, [])
 
-    const filteredStores = stores.filter(store =>
-        store.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        store.address?.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredUsers = users.filter(user =>
+        user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
     return (
@@ -35,22 +35,22 @@ export default function ShowStore() {
                 <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <div className="flex items-center gap-3">
-                            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Daftar Toko & Cabang</h1>
+                            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Daftar Admin Toko</h1>
                             <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700 ring-1 ring-inset ring-teal-600/20">
-                                {stores.length} Toko
+                                {users.length} Admin
                             </span>
                         </div>
-                        <p className="mt-1 text-sm text-slate-500">Kelola seluruh outlet dan informasi lokasi toko bisnis Anda.</p>
+                        <p className="mt-1 text-sm text-slate-500">Kelola akun administrator pengelola toko cabang.</p>
                     </div>
 
                     <Link
-                        to="/superAdmin/createStore"
+                        to="/superAdmin/createUser"
                         className="inline-flex items-center justify-center gap-2 rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-100"
                     >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
                         </svg>
-                        Tambah Toko
+                        Tambah Admin Toko
                     </Link>
                 </div>
 
@@ -64,7 +64,7 @@ export default function ShowStore() {
                         </div>
                         <input
                             type="text"
-                            placeholder="Cari nama toko atau alamat..."
+                            placeholder="Cari nama atau email admin..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:ring-4 focus:ring-teal-100"
@@ -72,7 +72,7 @@ export default function ShowStore() {
                     </div>
 
                     <button
-                        onClick={fetchData}
+                        onClick={fetchUser}
                         title="Refresh Data"
                         className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition"
                     >
@@ -90,60 +90,51 @@ export default function ShowStore() {
                             <thead className="border-b border-slate-200 bg-slate-50/80 text-xs uppercase font-semibold text-slate-500 tracking-wider">
                                 <tr>
                                     <th className="px-6 py-3.5 w-16 text-center">ID</th>
-                                    <th className="px-6 py-3.5">Nama Toko</th>
-                                    <th className="px-6 py-3.5">Alamat</th>
-                                    <th className="px-6 py-3.5">Status</th>
-                                    <th className="px-6 py-3.5 text-center">Aksi</th>
+                                    <th className="px-6 py-3.5">Nama Admin</th>
+                                    <th className="px-6 py-3.5">Email</th>
+                                    <th className="px-6 py-3.5 text-right">Role</th>
+                                    <th className="px-6 py-3.5 text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {loading ? (
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-12 text-center text-slate-400">
-                                            Memuat data toko...
+                                        <td colSpan="4" className="px-6 py-12 text-center text-slate-400">
+                                            Memuat data admin...
                                         </td>
                                     </tr>
-                                ) : filteredStores.length === 0 ? (
+                                ) : filteredUsers.length === 0 ? (
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
-                                            Tidak ada toko ditemukan.
+                                        <td colSpan="4" className="px-6 py-12 text-center text-slate-500">
+                                            Tidak ada admin ditemukan.
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredStores.map((store) => (
-                                        <tr key={store.id} className="hover:bg-slate-50/80 transition-colors">
+                                    filteredUsers.map(user => (
+                                        <tr key={user.id} className="hover:bg-slate-50/80 transition-colors">
                                             <td className="px-6 py-4 text-center font-mono text-xs font-semibold text-slate-400">
-                                                #{store.id}
+                                                #{user.id}
                                             </td>
                                             <td className="px-6 py-4 font-semibold text-slate-900">
-                                                {store.name}
+                                                {user.name}
                                             </td>
-                                            <td className="px-6 py-4 text-slate-600 max-w-md truncate">
-                                                {store.address}
+                                            <td className="px-6 py-4 text-slate-600">
+                                                {user.email}
                                             </td>
-                                            <td className="px-6 py-4">
-                                                {store.status === 'active' || store.status === 'Aktif' || !store.status ? (
-                                                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md ring-1 ring-inset ring-emerald-600/20">
-                                                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                                                        Aktif
-                                                    </span>
-                                                ) : (
-                                                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md ring-1 ring-inset ring-slate-500/20">
-                                                        <span className="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
-                                                        Tidak Aktif
-                                                    </span>
-                                                )}
+                                            <td className="px-6 py-4 text-right">
+                                                <span className="inline-flex items-center rounded-md bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
+                                                    Admin Toko
+                                                </span>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <Link
-                                                    to={`/superAdmin/editStore/${store.id}`}
-                                                    className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 transition"
+                                                <button
+                                                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition"
                                                 >
                                                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12l-7.5 7.5-7.5-7.5" />
                                                     </svg>
-                                                    Update Toko
-                                                </Link>
+                                                    Edit
+                                                </button>
                                             </td>
                                         </tr>
                                     ))
@@ -152,10 +143,11 @@ export default function ShowStore() {
                         </table>
                     </div>
                     <div className="border-t border-slate-200 bg-slate-50/50 px-6 py-3 text-xs text-slate-500">
-                        Menampilkan {filteredStores.length} dari {stores.length} toko
+                        Menampilkan {filteredUsers.length} dari {users.length} admin toko
                     </div>
                 </div>
             </div>
         </div>
     )
 }
+

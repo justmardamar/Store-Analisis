@@ -125,6 +125,16 @@ def create_user_superAdmin():
         )
     return jsonify({"message": "User created successfully"})
 
+@app.route('/api/superAdmin/user', methods=['GET'])
+@login_required
+def get_users_admin():
+    with get_db_cursor(commit=False) as cursor:
+        cursor.execute(
+            "SELECT id, name, email, role FROM users WHERE role = 'Admin' ORDER BY id ASC",
+        )
+        users = cursor.fetchall()
+    return jsonify({"users": users})
+
 @app.route('/api/admin/user/create', methods=['POST'])
 @login_required
 def create_user_admin():
