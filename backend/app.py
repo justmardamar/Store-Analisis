@@ -498,7 +498,7 @@ def get_warehouse_null():
 @app.route('/api/stock/set-warehouse/<int:stock_id>', methods=['POST'])
 @login_required
 def set_warehouse(stock_id):
-    data = request.get_json() or {}
+    data = request.get_json()
     warehouse_id = data.get('warehouse_id')
 
     if not stock_id or not warehouse_id:

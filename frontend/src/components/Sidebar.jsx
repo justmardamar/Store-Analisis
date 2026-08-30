@@ -19,7 +19,7 @@ const roleMenus = {
     { label: 'Transaksi', to: '/kasir/transaction' },
     { label: 'Buat Transaksi', to: '/kasir/transaction/create' },
   ],
-  'Stock': [
+  'Stok': [
     { label: 'Dashboard', to: '/' },
     { label: 'Stock', to: '/stock/data-location' },
     { label: 'Gudang', to: '/stock/warehouses' },

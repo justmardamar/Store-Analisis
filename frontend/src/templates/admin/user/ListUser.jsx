@@ -10,7 +10,7 @@ export default function ListUser() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const response = await axios.get('http://localhost:5000/api/users')
+      const response = await axios.get('http://localhost:5000/api/admin/user')
       setUsers(response.data.users || [])
     } catch (error) {
       console.error('Error fetching users:', error)
