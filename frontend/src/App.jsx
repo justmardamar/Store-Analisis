@@ -19,6 +19,7 @@ import CreateStore from './templates/superAdmin/store/CreateStore'
 import EditStore from './templates/superAdmin/store/EditStore'
 import ShowStore from './templates/superAdmin/store/ShowStore'
 import CreateUserAdmin from './templates/superAdmin/user/CreateUserAdmin'
+import ShowUserAdmin from './templates/superAdmin/user/ShowUserAdmin'
 import ShowSupplier from './templates/superAdmin/supplier/ShowSupplier'
 import CreateSupplier from './templates/superAdmin/supplier/CreateSupplier'
 
@@ -63,6 +64,7 @@ function App() {
             <Route path='/superAdmin/editStore/:id' element={<EditStore/>} />
             <Route path='/superAdmin/showStore' element={<ShowStore/>} />
             <Route path='/superAdmin/createUser' element={<CreateUserAdmin/>} />
+            <Route path='/superAdmin/showUser' element={<ShowUserAdmin/>} />
             <Route path='/superAdmin/showSupplier' element={<ShowSupplier/>} />
             <Route path='/superAdmin/createSupplier' element={<CreateSupplier/>} />
 

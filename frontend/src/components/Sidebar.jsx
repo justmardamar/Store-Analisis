@@ -5,7 +5,7 @@ const roleMenus = {
     { label: 'Dashboard', to: '/' },
     { label: 'Toko', to: '/superAdmin/showStore' },
     { label: 'Supplier', to: '/superAdmin/showSupplier' },
-    { label: 'Pengguna', to: '/superAdmin/createUser' },
+    { label: 'User Admin', to: '/superAdmin/showUser' },
   ],
   'Admin': [
     { label: 'Dashboard', to: '/' },
