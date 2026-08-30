@@ -8,7 +8,7 @@ export default function CreateUser() {
     name: "",
     email: "",
     password: "",
-    store_id: "",
+    store_id: localStorage.getItem('store_id'),
     role: ""
   })
   const [loading, setLoading] = useState(false)
@@ -31,7 +31,7 @@ export default function CreateUser() {
     try {
       setLoading(true)
       setMessage({ type: "", text: "" })
-      await axios.post('http://localhost:5000/api/user/create', user)
+      await axios.post('http://localhost:5000/api/admin/user/create', user)
       setMessage({ type: "success", text: "User berhasil dibuat!" })
       setTimeout(() => {
         navigate('/admin/listUser')
@@ -112,21 +112,6 @@ export default function CreateUser() {
                 value={user.password}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:ring-4 focus:ring-teal-100"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="store_id" className="block text-sm font-medium text-slate-700 mb-1">
-                ID Toko (Store ID)
-              </label>
-              <input
-                type="text"
-                id="store_id"
-                name="store_id"
-                value={user.store_id}
-                onChange={handleChange}
-                placeholder="Masukkan ID Toko (Opsional)"
                 className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:ring-4 focus:ring-teal-100"
               />
             </div>
