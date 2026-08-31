@@ -30,6 +30,7 @@ import CreateTransaction from './templates/kasir/transaction/CreateTransaction'
 import SetLocation from './templates/stock/NewStock/SetLocation'
 import ChangeStock from './templates/stock/NewStock/ChangeStock'
 import UpdateStockData from './templates/stock/NewStock/UpdateStockData'
+import FetchStock from './templates/stock/NewStock/FetchStock'
 import AddWarehouse from './templates/stock/warehouse/AddWarehouse'
 import Warehouses from './templates/stock/warehouse/Warehouses'
 
@@ -72,6 +73,7 @@ function App() {
             <Route path='/kasir/transaction/create' element={<CreateTransaction/>} />
 
             <Route path='/stock/data-location' element={<UpdateStockData/>} />
+            <Route path='/stock/fetch-stock' element={<FetchStock/>} />
             <Route path='/stock/change' element={<ChangeStock/>} />
             <Route path='/stock/set-location/:id' element={<SetLocation/>} />
             <Route path='/stock/warehouses' element={<Warehouses/>} />
