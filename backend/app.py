@@ -432,7 +432,7 @@ def create_transaction():
 def get_warehouses():
     store_id = session.get('store_id')
     with get_db_cursor(commit=False) as cursor:
-        cursor.execute("SELECT id, name, location FROM warehouses WHERE store_id = %s ORDER BY id ASC", (store_id,))
+        cursor.execute("SELECT id, location FROM warehouse WHERE store_id = %s ORDER BY id ASC", (store_id,))
         warehouses = cursor.fetchall()
     return jsonify({"warehouses": warehouses})
 
@@ -440,18 +440,43 @@ def get_warehouses():
 @login_required
 def create_warehouse():
     data = request.get_json() or {}
-    name = data.get('name')
     location = data.get('location')
+    store_id = session.get('store_id')
 
-    if not name or not location:
+    if not location:
         return jsonify({"message": "Nama gudang dan lokasi wajib diisi"}), 400
 
     with get_db_cursor(commit=True) as cursor:
         cursor.execute(
-            "INSERT INTO warehouses (name, location) VALUES (%s, %s)",
-            (name, location)
+            "INSERT INTO warehouse (store_id, location) VALUES (%s, %s)",
+            (store_id, location)
         )
     return jsonify({"message": "Gudang berhasil dibuat"})
+
+@app.route('/api/stock', methods=['GET'])
+@login_required
+def get_stock_null():
+    store_id = session.get('store_id')
+
+    query = """
+            SELECT s.id, p.name, s.warehouse_id, s.product_id, s.store_id, s.quantity, w.location
+            FROM stocks s
+            LEFT JOIN products p ON s.product_id = p.id
+            LEFT JOIN warehouse w ON s.warehouse_id = w.id
+            WHERE s.store_id = %s
+            """
+    
+
+    with get_db_cursor(commit=True) as cursor:
+        cursor.execute(
+            query,(store_id, )
+        )
+        stock = cursor.fetchall()
+        if not stock:
+            return jsonify({"message": "Stock tidak ditemukan atau tidak memiliki akses"}), 404
+
+    return jsonify({"stocks": stock})
+
 
 @app.route('/api/stock/create', methods=['POST'])
 @login_required
@@ -478,6 +503,34 @@ def get_warehouse_null():
             s.product_id, 
             s.supplier_id, 
             p.name AS product_name, 
+            p.category AS product_category,
+            p.price AS product_price
+        FROM stocks s
+        LEFT JOIN products p ON s.product_id = p.id
+        WHERE s.warehouse_id IS NULL AND s.store_id = %s
+        ORDER BY s.id ASC
+    """
+    with get_db_cursor(commit=False) as cursor:
+        cursor.execute(query, (store_id,))
+        stocks = cursor.fetchall()
+
+    for s in stocks:
+        if 'product_price' in s and s['product_price'] is not None:
+            s['product_price'] = float(s['product_price'])
+
+    return jsonify({"stocks": stocks})
+
+@app.route('/api/stock/fetch-stock', methods=['GET'])
+@login_required
+def get_all_stock():
+    store_id = session.get('store_id')
+    query = """
+        SELECT 
+            s.id AS stock_id, 
+            p.id AS product_id, 
+            p.name AS product_name,
+            s.warehouse_id,
+            s.supplier_id,
             p.category AS product_category,
             p.price AS product_price
         FROM stocks s

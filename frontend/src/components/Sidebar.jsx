@@ -21,7 +21,7 @@ const roleMenus = {
   ],
   'Stok': [
     { label: 'Dashboard', to: '/' },
-    { label: 'Stock', to: '/stock/data-location' },
+    { label: 'Stock non berlokasi', to: '/stock/fetch-stock' },
     { label: 'Gudang', to: '/stock/warehouses' },
     { label: 'Perubahan Stok', to: '/stock/change' },
   ],
