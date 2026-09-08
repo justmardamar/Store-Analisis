@@ -4,13 +4,14 @@ from psycopg2.extras import RealDictCursor
 from contextlib import contextmanager
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
-DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://postgres:password@localhost:5432/Storedb')
+DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/postgres')
 
 def get_connection():
     """Membuka koneksi database PostgreSQL murni menggunakan psycopg2"""
     return psycopg2.connect(DATABASE_URL)
+    print('berhasil')
 
 @contextmanager
 def get_db_cursor(commit=False):
