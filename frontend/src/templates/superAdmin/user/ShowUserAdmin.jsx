@@ -127,14 +127,7 @@ export default function ShowUserAdmin() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <button
-                                                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition"
-                                                >
-                                                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12l-7.5 7.5-7.5-7.5" />
-                                                    </svg>
-                                                    Edit
-                                                </button>
+                                                <a href={`/superAdmin/editUser/${user.id}`} style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}>Edit</a>
                                             </td>
                                         </tr>
                                     ))
