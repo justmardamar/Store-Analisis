@@ -27,9 +27,15 @@ const roleMenus = {
   ],
 };
 
+const logoutAuth = async () => {
+  const response = await axios.post('http://localhost:5000/api/logout');
+  localStorage.clear();
+  window.location.href = '/login';
+};
+
 export default function Sidebar() {
   const role = localStorage.getItem('role') || 'Admin';
-  const menuItems = roleMenus[role] || roleMenus.Admin;
+  const menuItems = roleMenus[role];
 
   return (
     <aside className="w-full shrink-0 border-b border-slate-200 bg-white px-5 py-5 lg:min-h-screen lg:w-64 lg:border-b-0 lg:border-r lg:px-4 lg:py-7">
@@ -55,6 +61,7 @@ export default function Sidebar() {
             {item.label}
           </NavLink>
         ))}
+        <button onClick={logoutAuth} className="flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900">Log out</button>
       </nav>
     </aside>
   );
