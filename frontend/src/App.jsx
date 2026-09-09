@@ -6,15 +6,21 @@ import LoginAuthRoute from './components/LoginAuthRoute'
 import AppShell from './components/AppShell'
 
 import CreateProduct from './templates/admin/product/CreateProduct'
+import EditProduct from './templates/admin/product/EditProduct'
 import ListTransaction from './templates/admin/transaction/ListTransaction'
 import DetailTransaction from './templates/admin/transaction/DetailTransaction'
 import CreateUser from './templates/admin/user/CreateUser'
+import EditUser from './templates/admin/user/EditUser'
 import CreateDataStock from './templates/admin/stocks/CreateDataStock'
+import ListProduct from './templates/admin/product/ListProduct'
+import ListUser from './templates/admin/user/ListUser'
 
 import CreateStore from './templates/superAdmin/store/CreateStore'
 import EditStore from './templates/superAdmin/store/EditStore'
 import ShowStore from './templates/superAdmin/store/ShowStore'
 import CreateUserAdmin from './templates/superAdmin/user/CreateUserAdmin'
+import EditAdmin from './templates/superAdmin/user/EditAdmin'
+import ShowUserAdmin from './templates/superAdmin/user/ShowUserAdmin'
 import ShowSupplier from './templates/superAdmin/supplier/ShowSupplier'
 import CreateSupplier from './templates/superAdmin/supplier/CreateSupplier'
 
@@ -25,8 +31,13 @@ import CreateTransaction from './templates/kasir/transaction/CreateTransaction'
 import SetLocation from './templates/stock/NewStock/SetLocation'
 import ChangeStock from './templates/stock/NewStock/ChangeStock'
 import UpdateStockData from './templates/stock/NewStock/UpdateStockData'
+import FetchStock from './templates/stock/NewStock/FetchStock'
 import AddWarehouse from './templates/stock/warehouse/AddWarehouse'
 import Warehouses from './templates/stock/warehouse/Warehouses'
+
+import StockRequestView from './templates/admin/stockRequest/StockRequestView'
+import ShowBranchRequest from './templates/cabang/ShowBranchRequest'
+import ManageBranchStore from './templates/cabang/ManageBranchStore'
 
 
 function App() {
@@ -46,22 +57,33 @@ function App() {
             <Route path="/" element={<Dashboard />} />
 
             <Route path="/admin/createProduct" element={<CreateProduct />} />
+            <Route path="/admin/editProduct/:id" element={<EditProduct />} />
             <Route path="/admin/transaction" element={<ListTransaction />} />
             <Route path="/admin/transaction/:id" element={<DetailTransaction />} />
             <Route path="/admin/createUser" element={<CreateUser />} />
+            <Route path="/admin/editUser/:id" element={<EditUser />} />
             <Route path="/admin/createDataStock" element={<CreateDataStock />} />
+            <Route path="/admin/listProduct" element={<ListProduct />} />
+            <Route path="/admin/listUser" element={<ListUser />} />
+            <Route path="/admin/stock-request" element={<StockRequestView />} />
 
             <Route path='/superAdmin/createStore' element={<CreateStore/>} />
             <Route path='/superAdmin/editStore/:id' element={<EditStore/>} />
             <Route path='/superAdmin/showStore' element={<ShowStore/>} />
             <Route path='/superAdmin/createUser' element={<CreateUserAdmin/>} />
+            <Route path='/superAdmin/editUser/:id' element={<EditAdmin/>} />
+            <Route path='/superAdmin/showUser' element={<ShowUserAdmin/>} />
             <Route path='/superAdmin/showSupplier' element={<ShowSupplier/>} />
             <Route path='/superAdmin/createSupplier' element={<CreateSupplier/>} />
+
+            <Route path="/cabang/requests" element={<ShowBranchRequest />} />
+            <Route path="/cabang/stores" element={<ManageBranchStore />} />
 
             <Route path='/kasir/transaction' element={<ShowTransaction/>} />
             <Route path='/kasir/transaction/create' element={<CreateTransaction/>} />
 
             <Route path='/stock/data-location' element={<UpdateStockData/>} />
+            <Route path='/stock/fetch-stock' element={<FetchStock/>} />
             <Route path='/stock/change' element={<ChangeStock/>} />
             <Route path='/stock/set-location/:id' element={<SetLocation/>} />
             <Route path='/stock/warehouses' element={<Warehouses/>} />

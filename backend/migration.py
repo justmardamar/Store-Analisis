@@ -7,16 +7,27 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from database import get_db_cursor
 
 CREATE_TABLES_SQL = """
--- 1. STORES
+-- 1. BRANCHES (Cabang)
+CREATE TABLE IF NOT EXISTS branches (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    location TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. STORES (Toko)
 CREATE TABLE IF NOT EXISTS stores (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     address TEXT,
+    branch_id INTEGER REFERENCES branches(id) ON DELETE SET NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE stores ADD COLUMN IF NOT EXISTS branch_id INTEGER REFERENCES branches(id) ON DELETE SET NULL;
 
--- 2. USERS
+-- 3. USERS
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -24,22 +35,35 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL,
     store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+    branch_id INTEGER REFERENCES branches(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE users ADD COLUMN IF NOT EXISTS branch_id INTEGER REFERENCES branches(id) ON DELETE CASCADE;
 
--- 3. PRODUCTS
+-- 4. PRODUCTS (Master Produk oleh SuperAdmin)
 CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
     store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     price NUMERIC(12,2) NOT NULL,
     category VARCHAR(50),
+    status VARCHAR(10) DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 4. SUPPLIERS
+-- 5. STORE PRODUCTS (Katalog Pilihan per Toko)
+CREATE TABLE IF NOT EXISTS store_products (
+    id SERIAL PRIMARY KEY,
+    store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(store_id, product_id)
+);
+
+-- 6. SUPPLIERS
 CREATE TABLE IF NOT EXISTS suppliers (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -49,7 +73,7 @@ CREATE TABLE IF NOT EXISTS suppliers (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 5. PRODUCT_SUPPLIERS
+-- 7. PRODUCT_SUPPLIERS
 CREATE TABLE IF NOT EXISTS product_suppliers (
     id SERIAL PRIMARY KEY,
     product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
@@ -58,7 +82,7 @@ CREATE TABLE IF NOT EXISTS product_suppliers (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 6. WAREHOUSE
+-- 8. WAREHOUSE
 CREATE TABLE IF NOT EXISTS warehouse (
     id SERIAL PRIMARY KEY,
     location VARCHAR(100) NOT NULL,
@@ -66,7 +90,7 @@ CREATE TABLE IF NOT EXISTS warehouse (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 7. STOCKS
+-- 9. STOCKS
 CREATE TABLE IF NOT EXISTS stocks (
     id SERIAL PRIMARY KEY,
     warehouse_id INTEGER REFERENCES warehouse(id) ON DELETE CASCADE,
@@ -77,7 +101,19 @@ CREATE TABLE IF NOT EXISTS stocks (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 8. REPORTS
+-- 10. STOCK REQUESTS (Request Barang Toko ke Cabang)
+CREATE TABLE IF NOT EXISTS stock_requests (
+    id SERIAL PRIMARY KEY,
+    store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+    branch_id INTEGER REFERENCES branches(id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'delivered', 'completed')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 11. REPORTS
 CREATE TABLE IF NOT EXISTS reports (
     id SERIAL PRIMARY KEY,
     store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
@@ -88,7 +124,7 @@ CREATE TABLE IF NOT EXISTS reports (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 9. ORDERS
+-- 12. ORDERS
 CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
     store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
@@ -96,7 +132,7 @@ CREATE TABLE IF NOT EXISTS orders (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 10. DETAIL_ORDER
+-- 13. DETAIL_ORDER
 CREATE TABLE IF NOT EXISTS detail_order (
     id SERIAL PRIMARY KEY,
     order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
@@ -105,7 +141,7 @@ CREATE TABLE IF NOT EXISTS detail_order (
     total NUMERIC(12,2) NOT NULL
 );
 
--- 11. TRANSACTIONS
+-- 14. TRANSACTIONS
 CREATE TABLE IF NOT EXISTS transactions (
     id SERIAL PRIMARY KEY,
     order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
@@ -115,6 +151,8 @@ CREATE TABLE IF NOT EXISTS transactions (
 """
 
 DROP_TABLES_SQL = """
+DROP TABLE IF EXISTS stock_requests CASCADE;
+DROP TABLE IF EXISTS store_products CASCADE;
 DROP TABLE IF EXISTS transactions CASCADE;
 DROP TABLE IF EXISTS detail_order CASCADE;
 DROP TABLE IF EXISTS orders CASCADE;
@@ -126,18 +164,30 @@ DROP TABLE IF EXISTS suppliers CASCADE;
 DROP TABLE IF EXISTS products CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS stores CASCADE;
+DROP TABLE IF EXISTS branches CASCADE;
+"""
+
+SEED_DATA_SQL = """
+-- Insert default Cabang jika belum ada
+INSERT INTO branches (name, location)
+SELECT 'Cabang Utama Jakarta', 'Jakarta Selatan'
+WHERE NOT EXISTS (SELECT 1 FROM branches WHERE name = 'Cabang Utama Jakarta');
 """
 
 def create_tables():
     """Membuat seluruh tabel database menggunakan Pure DDL SQL"""
     with get_db_cursor(commit=True) as cursor:
         cursor.execute(CREATE_TABLES_SQL)
+        cursor.execute(SEED_DATA_SQL)
+        print("Tabel & Seed Data Cabang berhasil diperbarui!")
 
 def reset_tables():
     """Menghapus dan membuat ulang seluruh tabel dari awal"""
     with get_db_cursor(commit=True) as cursor:
         cursor.execute(DROP_TABLES_SQL)
         cursor.execute(CREATE_TABLES_SQL)
+        cursor.execute(SEED_DATA_SQL)
+        print("Reset tabel & seed data berhasil!")
 
 if __name__ == '__main__':
     create_tables()

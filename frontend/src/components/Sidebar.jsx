@@ -1,33 +1,55 @@
 import { NavLink } from 'react-router-dom';
+import axios from 'axios';
 
 const roleMenus = {
   'Super Admin': [
     { label: 'Dashboard', to: '/' },
     { label: 'Toko', to: '/superAdmin/showStore' },
+    { label: 'Master Produk', to: '/admin/createProduct' },
     { label: 'Supplier', to: '/superAdmin/showSupplier' },
-    { label: 'Pengguna', to: '/superAdmin/createUser' },
+    { label: 'User Admin & Cabang', to: '/superAdmin/showUser' },
   ],
-  Admin: [
+  'superAdmin': [
     { label: 'Dashboard', to: '/' },
-    { label: 'Produk', to: '/admin/createProduct' },
-    { label: 'Transaksi', to: '/admin/transaction' },
+    { label: 'Toko', to: '/superAdmin/showStore' },
+    { label: 'Master Produk', to: '/admin/createProduct' },
+    { label: 'Supplier', to: '/superAdmin/showSupplier' },
+    { label: 'User Admin & Cabang', to: '/superAdmin/showUser' },
   ],
-  kasir: [
+  'Cabang': [
+    { label: 'Dashboard', to: '/' },
+    { label: 'Request Barang Toko', to: '/cabang/requests' },
+    { label: 'Daftar Toko Bawahan', to: '/cabang/stores' },
+  ],
+  'Admin': [
+    { label: 'Dashboard', to: '/' },
+    { label: 'Katalog Produk Toko', to: '/admin/listProduct' },
+    { label: 'Request Kebutuhan Barang', to: '/admin/stock-request' },
+    { label: 'Transaksi', to: '/admin/transaction' },
+    { label: 'User', to: '/admin/listUser' },
+  ],
+  'kasir': [
     { label: 'Dashboard', to: '/' },
     { label: 'Transaksi', to: '/kasir/transaction' },
     { label: 'Buat Transaksi', to: '/kasir/transaction/create' },
   ],
-  Stock: [
+  'Stok': [
     { label: 'Dashboard', to: '/' },
-    { label: 'Stock', to: '/stock/data-location' },
-    { label: 'Gudang', to: '/stock/add-warehouse' },
+    { label: 'Stock non berlokasi', to: '/stock/fetch-stock' },
+    { label: 'Gudang', to: '/stock/warehouses' },
     { label: 'Perubahan Stok', to: '/stock/change' },
   ],
 };
 
+const logoutAuth = async () => {
+  const response = await axios.post('http://localhost:5000/api/logout');
+  localStorage.clear();
+  window.location.href = '/login';
+};
+
 export default function Sidebar() {
   const role = localStorage.getItem('role') || 'Admin';
-  const menuItems = roleMenus[role] || roleMenus.Admin;
+  const menuItems = roleMenus[role];
 
   return (
     <aside className="w-full shrink-0 border-b border-slate-200 bg-white px-5 py-5 lg:min-h-screen lg:w-64 lg:border-b-0 lg:border-r lg:px-4 lg:py-7">
@@ -53,6 +75,7 @@ export default function Sidebar() {
             {item.label}
           </NavLink>
         ))}
+        <button onClick={logoutAuth} className="flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900">Log out</button>
       </nav>
     </aside>
   );
