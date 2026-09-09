@@ -92,6 +92,7 @@ export default function ShowUserAdmin() {
                                     <th className="px-6 py-3.5 w-16 text-center">ID</th>
                                     <th className="px-6 py-3.5">Nama Admin</th>
                                     <th className="px-6 py-3.5">Email</th>
+                                    <th className="px-6 py-3.5">Lokasi</th>
                                     <th className="px-6 py-3.5 text-right">Role</th>
                                     <th className="px-6 py-3.5 text-center">Actions</th>
                                 </tr>
@@ -121,13 +122,21 @@ export default function ShowUserAdmin() {
                                             <td className="px-6 py-4 text-slate-600">
                                                 {user.email}
                                             </td>
+                                            <td className="px-6 py-4 text-slate-600">
+                                                {user.store_name}
+                                            </td>
                                             <td className="px-6 py-4 text-right">
                                                 <span className="inline-flex items-center rounded-md bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
                                                     Admin Toko
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <a href={`/superAdmin/editUser/${user.id}`} style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}>Edit</a>
+                                                <Link to={`/superAdmin/editUser/${user.id}`} className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-sm font-medium text-blue-600 transition hover:bg-blue-50 hover:text-blue-700">
+                                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                                    </svg>
+                                                    <span>Edit</span>
+                                                </Link>
                                             </td>
                                         </tr>
                                     ))
