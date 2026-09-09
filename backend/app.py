@@ -55,6 +55,14 @@ class LoginResource(Resource):
 
         return {"isLoggedIn": False, "message": "Email atau password salah"}, 401
 
+class logoutAuth(Resource):
+    def post(self):
+        session.pop('user_id', None)
+        session.pop('username', None)
+        session.pop('role', None)
+        session.pop('store_id', None)
+        return {"isLoggedIn": False, "message": "Logout successfully"}, 200
+
 
 # ================= ================= =================
 # SUPER ADMIN (STORES & USER MANAGEMENT)
@@ -124,7 +132,7 @@ class SuperAdminUserListResource(Resource):
     def get(self):
         with get_db_cursor(commit=False) as cursor:
             cursor.execute(
-                "SELECT id, name, email, role FROM users WHERE role = 'Admin' ORDER BY id ASC",
+                "SELECT u.id, u.name, u.email, u.role, s.name as store_name FROM users u LEFT JOIN stores s ON u.store_id = s.id WHERE u.role = 'Admin' ORDER BY u.id ASC",
             )
             users = cursor.fetchall()
         return {"users": users}, 200
@@ -600,6 +608,7 @@ class StockSetWarehouseResource(Resource):
 
 # Auth
 api.add_resource(LoginResource, '/api/login')
+api.add_resource(logoutAuth, '/api/logout')
 
 # Super Admin Stores
 api.add_resource(StoreListResource, '/api/store')
