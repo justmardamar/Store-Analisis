@@ -1,18 +1,32 @@
 import { NavLink } from 'react-router-dom';
+import axios from 'axios';
 
 const roleMenus = {
   'Super Admin': [
     { label: 'Dashboard', to: '/' },
     { label: 'Toko', to: '/superAdmin/showStore' },
+    { label: 'Master Produk', to: '/admin/createProduct' },
     { label: 'Supplier', to: '/superAdmin/showSupplier' },
-    { label: 'User Admin', to: '/superAdmin/showUser' },
+    { label: 'User Admin & Cabang', to: '/superAdmin/showUser' },
+  ],
+  'superAdmin': [
+    { label: 'Dashboard', to: '/' },
+    { label: 'Toko', to: '/superAdmin/showStore' },
+    { label: 'Master Produk', to: '/admin/createProduct' },
+    { label: 'Supplier', to: '/superAdmin/showSupplier' },
+    { label: 'User Admin & Cabang', to: '/superAdmin/showUser' },
+  ],
+  'Cabang': [
+    { label: 'Dashboard', to: '/' },
+    { label: 'Request Barang Toko', to: '/cabang/requests' },
+    { label: 'Daftar Toko Bawahan', to: '/cabang/stores' },
   ],
   'Admin': [
     { label: 'Dashboard', to: '/' },
-    { label: 'Produk', to: '/admin/listProduct' },
+    { label: 'Katalog Produk Toko', to: '/admin/listProduct' },
+    { label: 'Request Kebutuhan Barang', to: '/admin/stock-request' },
     { label: 'Transaksi', to: '/admin/transaction' },
     { label: 'User', to: '/admin/listUser' },
-    { label: 'Alokasi Stok', to: '/admin/createDataStock' },
   ],
   'kasir': [
     { label: 'Dashboard', to: '/' },

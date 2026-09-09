@@ -35,6 +35,10 @@ import FetchStock from './templates/stock/NewStock/FetchStock'
 import AddWarehouse from './templates/stock/warehouse/AddWarehouse'
 import Warehouses from './templates/stock/warehouse/Warehouses'
 
+import StockRequestView from './templates/admin/stockRequest/StockRequestView'
+import ShowBranchRequest from './templates/cabang/ShowBranchRequest'
+import ManageBranchStore from './templates/cabang/ManageBranchStore'
+
 
 function App() {
 
@@ -61,6 +65,7 @@ function App() {
             <Route path="/admin/createDataStock" element={<CreateDataStock />} />
             <Route path="/admin/listProduct" element={<ListProduct />} />
             <Route path="/admin/listUser" element={<ListUser />} />
+            <Route path="/admin/stock-request" element={<StockRequestView />} />
 
             <Route path='/superAdmin/createStore' element={<CreateStore/>} />
             <Route path='/superAdmin/editStore/:id' element={<EditStore/>} />
@@ -70,6 +75,9 @@ function App() {
             <Route path='/superAdmin/showUser' element={<ShowUserAdmin/>} />
             <Route path='/superAdmin/showSupplier' element={<ShowSupplier/>} />
             <Route path='/superAdmin/createSupplier' element={<CreateSupplier/>} />
+
+            <Route path="/cabang/requests" element={<ShowBranchRequest />} />
+            <Route path="/cabang/stores" element={<ManageBranchStore />} />
 
             <Route path='/kasir/transaction' element={<ShowTransaction/>} />
             <Route path='/kasir/transaction/create' element={<CreateTransaction/>} />

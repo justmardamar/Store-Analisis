@@ -36,7 +36,7 @@ class LoginResource(Resource):
 
         with get_db_cursor(commit=False) as cursor:
             cursor.execute(
-                "SELECT id, name, email, store_id, role, password FROM users WHERE email = %s",
+                "SELECT id, name, email, store_id, branch_id, role, password FROM users WHERE email = %s",
                 (email,)
             )
             user = cursor.fetchone()
@@ -46,11 +46,13 @@ class LoginResource(Resource):
             session['username'] = user['name']
             session['role'] = user['role']
             session['store_id'] = user['store_id']
+            session['branch_id'] = user['branch_id']
             return {
                 "isLoggedIn": True,
                 "role": user['role'],
                 "username": user['name'],
-                "store_id": user['store_id']
+                "store_id": user['store_id'],
+                "branch_id": user['branch_id']
             }, 200
 
         return {"isLoggedIn": False, "message": "Email atau password salah"}, 401
@@ -61,19 +63,53 @@ class logoutAuth(Resource):
         session.pop('username', None)
         session.pop('role', None)
         session.pop('store_id', None)
-        return {"isLoggedIn": False, "message": "Logout successfully"}, 200
+        session.pop('branch_id', None)
+        return {"message": "logout berhasil"}, 200
 
 
 # ================= ================= =================
-# SUPER ADMIN (STORES & USER MANAGEMENT)
+# BRANCH & SUPER ADMIN MANAGEMENT
 # ================= ================= =================
+
+class BranchListResource(Resource):
+    method_decorators = [login_required]
+
+    def get(self):
+        with get_db_cursor(commit=False) as cursor:
+            cursor.execute("SELECT id, name, location, created_at FROM branches ORDER BY id ASC")
+            branches = cursor.fetchall()
+        for b in branches:
+            if b.get('created_at'):
+                b['created_at'] = b['created_at'].isoformat()
+        return {"branches": branches}, 200
+
+    def post(self):
+        data = request.get_json() or {}
+        name = data.get('name')
+        location = data.get('location')
+
+        if not name:
+            return {"message": "Nama cabang wajib diisi"}, 400
+
+        with get_db_cursor(commit=True) as cursor:
+            cursor.execute(
+                "INSERT INTO branches (name, location) VALUES (%s, %s)",
+                (name, location)
+            )
+        return {"message": "Cabang berhasil dibuat"}, 200
+
 
 class StoreListResource(Resource):
     method_decorators = [login_required]
 
     def get(self):
         with get_db_cursor(commit=False) as cursor:
-            cursor.execute("SELECT id, name, address FROM stores ORDER BY id ASC")
+            cursor.execute("""
+                SELECT s.id, s.name, s.address, s.status, s.branch_id, b.name AS branch_name
+                FROM stores s
+                LEFT JOIN branches b ON s.branch_id = b.id
+                ORDER BY s.id ASC
+            """)
             stores = cursor.fetchall()
         return {"stores": stores}, 200
 
@@ -82,7 +118,7 @@ class StoreItemResource(Resource):
 
     def get(self, id):
         with get_db_cursor(commit=False) as cursor:
-            cursor.execute("SELECT name, address FROM stores WHERE id = %s", (id,))
+            cursor.execute("SELECT name, address, branch_id FROM stores WHERE id = %s", (id,))
             store = cursor.fetchone()
         if not store:
             return {"message": "Store not found"}, 404
@@ -95,14 +131,15 @@ class StoreCreateResource(Resource):
         data = request.get_json() or {}
         name = data.get('name')
         address = data.get('address')
+        branch_id = data.get('branch_id')
 
         if not name:
             return {"message": "Nama toko wajib diisi"}, 400
 
         with get_db_cursor(commit=True) as cursor:
             cursor.execute(
-                "INSERT INTO stores (name, address) VALUES (%s, %s)",
-                (name, address)
+                "INSERT INTO stores (name, address, branch_id) VALUES (%s, %s, %s)",
+                (name, address, branch_id)
             )
         return {"message": "Store created successfully"}, 200
 
@@ -114,14 +151,15 @@ class StoreUpdateResource(Resource):
         name = data.get('name')
         address = data.get('address')
         status = data.get('status')
+        branch_id = data.get('branch_id')
 
         if not name:
             return {"message": "Nama toko wajib diisi"}, 400
 
         with get_db_cursor(commit=True) as cursor:
             cursor.execute(
-                "UPDATE stores SET name = %s, address = %s , status = %s WHERE id = %s",
-                (name, address, status, id)
+                "UPDATE stores SET name = %s, address = %s, status = %s, branch_id = %s WHERE id = %s",
+                (name, address, status, branch_id, id)
             )
         return {"message": "Store updated successfully"}, 200
 
@@ -132,7 +170,7 @@ class SuperAdminUserListResource(Resource):
     def get(self):
         with get_db_cursor(commit=False) as cursor:
             cursor.execute(
-                "SELECT u.id, u.name, u.email, u.role, s.name as store_name FROM users u LEFT JOIN stores s ON u.store_id = s.id WHERE u.role = 'Admin' ORDER BY u.id ASC",
+                "SELECT id, name, email, role FROM users WHERE role IN ('Admin', 'Cabang') ORDER BY id ASC",
             )
             users = cursor.fetchall()
         return {"users": users}, 200
@@ -146,6 +184,8 @@ class SuperAdminUserCreateResource(Resource):
         email = data.get('email')
         password = data.get('password')
         store_id = data.get('store_id')
+        branch_id = data.get('branch_id')
+        role = data.get('role', 'Admin')
 
         if not name or not email or not password:
             return {"message": "Nama, email, dan password wajib diisi"}, 400
@@ -154,8 +194,8 @@ class SuperAdminUserCreateResource(Resource):
 
         with get_db_cursor(commit=True) as cursor:
             cursor.execute(
-                "INSERT INTO users (name, email, password, store_id, role) VALUES (%s, %s, %s, %s, %s)",
-                (name, email, hashed_password, store_id, 'Admin')
+                "INSERT INTO users (name, email, password, store_id, branch_id, role) VALUES (%s, %s, %s, %s, %s, %s)",
+                (name, email, hashed_password, store_id, branch_id, role)
             )
         return {"message": "User created successfully"}, 200
 
@@ -165,7 +205,7 @@ class SuperAdminUserItemResource(Resource):
     def get(self, id):
         with get_db_cursor(commit=False) as cursor:
             cursor.execute(
-                "SELECT id, name, email, role FROM users WHERE id = %s AND role = 'Admin'",
+                "SELECT id, name, email, role, store_id, branch_id FROM users WHERE id = %s",
                 (id,)
             )
             user = cursor.fetchone()
@@ -266,18 +306,17 @@ class AdminUserEditResource(Resource):
 
 
 # ================= ================= =================
-# PRODUCT & SUPPLIER MANAGEMENT
+# PRODUCT & STORE CATALOG MANAGEMENT
 # ================= ================= =================
 
 class ProductListResource(Resource):
     method_decorators = [login_required]
 
     def get(self):
-        store_id = session.get('store_id')
+        # Global Master Product list for SuperAdmin and store selection catalog
         with get_db_cursor(commit=False) as cursor:
             cursor.execute(
-                "SELECT id, name, price, category, status FROM products WHERE store_id = %s ORDER BY id ASC",
-                (store_id,)
+                "SELECT id, name, price, category, status FROM products ORDER BY id ASC"
             )
             products = cursor.fetchall()
 
@@ -291,19 +330,22 @@ class ProductCreateResource(Resource):
     method_decorators = [login_required]
 
     def post(self):
+        # Only SuperAdmin can create master products
+        if session.get('role') != 'superAdmin':
+            return {"message": "Hanya SuperAdmin yang dapat membuat master produk baru"}, 403
+
         data = request.get_json() or {}
         name = data.get('name')
         price = data.get('price')
         category = data.get('category')
-        store_id = session.get('store_id')
 
         if not name or price is None:
             return {"message": "Nama produk dan harga wajib diisi"}, 400
 
         with get_db_cursor(commit=True) as cursor:
             cursor.execute(
-                "INSERT INTO products (name, price, category, store_id) VALUES (%s, %s, %s, %s)",
-                (name, price, category, store_id)
+                "INSERT INTO products (name, price, category) VALUES (%s, %s, %s)",
+                (name, price, category)
             )
         return {"message": "Product created successfully"}, 200
 
@@ -311,11 +353,10 @@ class ProductItemResource(Resource):
     method_decorators = [login_required]
 
     def get(self, id):
-        store_id = session.get('store_id')
         with get_db_cursor(commit=False) as cursor:
             cursor.execute(
-                "SELECT id, name, price, category FROM products WHERE id = %s AND store_id = %s",
-                (id, store_id)
+                "SELECT id, name, price, category FROM products WHERE id = %s",
+                (id,)
             )
             product = cursor.fetchone()
 
@@ -331,21 +372,101 @@ class ProductUpdateResource(Resource):
     method_decorators = [login_required]
 
     def put(self, id):
+        if session.get('role') != 'superAdmin':
+            return {"message": "Hanya SuperAdmin yang dapat mengedit produk master"}, 403
+
         data = request.get_json() or {}
         name = data.get('name')
         price = data.get('price')
         category = data.get('category')
-        store_id = session.get('store_id')
 
         if not name or price is None:
             return {"message": "Nama produk dan harga wajib diisi"}, 400
 
         with get_db_cursor(commit=True) as cursor:
             cursor.execute(
-                "UPDATE products SET name = %s, price = %s, category = %s WHERE id = %s AND store_id = %s",
-                (name, price, category, id, store_id)
+                "UPDATE products SET name = %s, price = %s, category = %s WHERE id = %s",
+                (name, price, category, id)
             )
         return {"message": "Product updated successfully"}, 200
+
+
+# STORE CATALOG RESOURCE (Select/Remove products for specific store)
+
+class StoreProductCatalogResource(Resource):
+    method_decorators = [login_required]
+
+    def get(self):
+        store_id = session.get('store_id')
+        if not store_id:
+            return {"message": "Store ID tidak terdaftar dalam sesi"}, 400
+
+        query = """
+            SELECT 
+                p.id, 
+                p.name, 
+                p.price, 
+                p.category,
+                CASE WHEN sp.id IS NOT NULL THEN TRUE ELSE FALSE END AS is_in_store,
+                COALESCE(st.quantity, 0) AS stock_quantity
+            FROM products p
+            LEFT JOIN store_products sp ON p.id = sp.product_id AND sp.store_id = %s AND sp.is_active = TRUE
+            LEFT JOIN stocks st ON p.id = st.product_id AND st.store_id = %s
+            ORDER BY p.id ASC
+        """
+        with get_db_cursor(commit=False) as cursor:
+            cursor.execute(query, (store_id, store_id))
+            products = cursor.fetchall()
+
+        for p in products:
+            if 'price' in p and p['price'] is not None:
+                p['price'] = float(p['price'])
+
+        return {"products": products}, 200
+
+    def post(self):
+        store_id = session.get('store_id')
+        data = request.get_json() or {}
+        product_id = data.get('product_id')
+
+        if not store_id or not product_id:
+            return {"message": "Store ID dan Product ID wajib diisi"}, 400
+
+        with get_db_cursor(commit=True) as cursor:
+            # 1. Insert into store_products catalog
+            cursor.execute("""
+                INSERT INTO store_products (store_id, product_id, is_active)
+                VALUES (%s, %s, TRUE)
+                ON CONFLICT (store_id, product_id) DO UPDATE SET is_active = TRUE
+            """, (store_id, product_id))
+
+            # 2. Ensure entry exists in stocks table with quantity = 0 if missing
+            cursor.execute("""
+                INSERT INTO stocks (store_id, product_id, quantity)
+                SELECT %s, %s, 0
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM stocks WHERE store_id = %s AND product_id = %s
+                )
+            """, (store_id, product_id, store_id, product_id))
+
+        return {"message": "Produk berhasil ditambahkan ke katalog toko dengan stok 0"}, 200
+
+class StoreProductItemResource(Resource):
+    method_decorators = [login_required]
+
+    def delete(self, product_id):
+        store_id = session.get('store_id')
+        if not store_id or not product_id:
+            return {"message": "Store ID dan Product ID wajib diisi"}, 400
+
+        with get_db_cursor(commit=True) as cursor:
+            cursor.execute("""
+                UPDATE store_products SET is_active = FALSE 
+                WHERE store_id = %s AND product_id = %s
+            """, (store_id, product_id))
+
+        return {"message": "Produk berhasil dihapus dari katalog toko"}, 200
+
 
 class SupplierListResource(Resource):
     method_decorators = [login_required]
@@ -488,6 +609,137 @@ class TransactionCreateResource(Resource):
 
 
 # ================= ================= =================
+# STOCK REQUEST WORKFLOW (TOKO -> CABANG)
+# ================= ================= =================
+
+class StockRequestResource(Resource):
+    method_decorators = [login_required]
+
+    def get(self):
+        role = session.get('role')
+        store_id = session.get('store_id')
+        branch_id = session.get('branch_id')
+
+        with get_db_cursor(commit=False) as cursor:
+            if role == 'Cabang':
+                # Cabang views requests from all stores under its branch
+                query = """
+                    SELECT 
+                        sr.id, sr.store_id, s.name AS store_name,
+                        sr.product_id, p.name AS product_name, p.category AS product_category,
+                        sr.quantity, sr.status, sr.created_at, sr.updated_at
+                    FROM stock_requests sr
+                    JOIN stores s ON sr.store_id = s.id
+                    JOIN products p ON sr.product_id = p.id
+                    WHERE sr.branch_id = %s OR s.branch_id = %s
+                    ORDER BY sr.id DESC
+                """
+                cursor.execute(query, (branch_id, branch_id))
+            else:
+                # Toko (Admin) views requests submitted by their store
+                query = """
+                    SELECT 
+                        sr.id, sr.store_id, s.name AS store_name,
+                        sr.product_id, p.name AS product_name, p.category AS product_category,
+                        sr.quantity, sr.status, sr.created_at, sr.updated_at
+                    FROM stock_requests sr
+                    JOIN stores s ON sr.store_id = s.id
+                    JOIN products p ON sr.product_id = p.id
+                    WHERE sr.store_id = %s
+                    ORDER BY sr.id DESC
+                """
+                cursor.execute(query, (store_id,))
+
+            requests_data = cursor.fetchall()
+
+        for r in requests_data:
+            if r.get('created_at'):
+                r['created_at'] = r['created_at'].isoformat()
+            if r.get('updated_at'):
+                r['updated_at'] = r['updated_at'].isoformat()
+
+        return {"stock_requests": requests_data}, 200
+
+    def post(self):
+        # Toko submits a stock request to Cabang
+        store_id = session.get('store_id')
+        data = request.get_json() or {}
+        product_id = data.get('product_id')
+        quantity = data.get('quantity')
+
+        if not store_id or not product_id or not quantity or int(quantity) <= 0:
+            return {"message": "Produk dan kuantitas valid wajib diisi"}, 400
+
+        with get_db_cursor(commit=True) as cursor:
+            # Get assigned branch_id for this store
+            cursor.execute("SELECT branch_id FROM stores WHERE id = %s", (store_id,))
+            store_res = cursor.fetchone()
+            branch_id = store_res.get('branch_id') if store_res else None
+
+            # Fallback to first branch if unassigned
+            if not branch_id:
+                cursor.execute("SELECT id FROM branches ORDER BY id ASC LIMIT 1")
+                b_res = cursor.fetchone()
+                branch_id = b_res['id'] if b_res else None
+
+            cursor.execute("""
+                INSERT INTO stock_requests (store_id, branch_id, product_id, quantity, status)
+                VALUES (%s, %s, %s, %s, 'pending')
+            """, (store_id, branch_id, product_id, int(quantity)))
+
+        return {"message": "Request barang berhasil diajukan ke Cabang"}, 200
+
+
+class StockRequestStatusResource(Resource):
+    method_decorators = [login_required]
+
+    def put(self, id):
+        data = request.get_json() or {}
+        new_status = data.get('status')
+
+        valid_statuses = ['pending', 'accepted', 'delivered', 'completed']
+        if new_status not in valid_statuses:
+            return {"message": f"Status tidak valid. Pilihan: {', '.join(valid_statuses)}"}, 400
+
+        with get_db_cursor(commit=True) as cursor:
+            # Fetch stock request
+            cursor.execute("SELECT id, store_id, product_id, quantity, status FROM stock_requests WHERE id = %s", (id,))
+            req = cursor.fetchone()
+
+            if not req:
+                return {"message": "Data request stok tidak ditemukan"}, 404
+
+            # Update status
+            cursor.execute("""
+                UPDATE stock_requests 
+                SET status = %s, updated_at = CURRENT_TIMESTAMP 
+                WHERE id = %s
+            """, (new_status, id))
+
+            # When status changes to 'completed', automatically add stock quantity to store
+            if new_status == 'completed' and req['status'] != 'completed':
+                store_id = req['store_id']
+                product_id = req['product_id']
+                qty = req['quantity']
+
+                # Upsert stock quantity for store
+                cursor.execute("""
+                    INSERT INTO stocks (store_id, product_id, quantity)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (id) DO NOTHING
+                """, (store_id, product_id, qty))
+
+                # Update quantity if record exists
+                cursor.execute("""
+                    UPDATE stocks 
+                    SET quantity = quantity + %s, updated_at = CURRENT_TIMESTAMP 
+                    WHERE store_id = %s AND product_id = %s
+                """, (qty, store_id, product_id))
+
+        return {"message": f"Status request stok berhasil diperbarui menjadi {new_status}"}, 200
+
+
+# ================= ================= =================
 # STOCKS & WAREHOUSE
 # ================= ================= =================
 
@@ -610,6 +862,9 @@ class StockSetWarehouseResource(Resource):
 api.add_resource(LoginResource, '/api/login')
 api.add_resource(logoutAuth, '/api/logout')
 
+# Branch Management
+api.add_resource(BranchListResource, '/api/branches')
+
 # Super Admin Stores
 api.add_resource(StoreListResource, '/api/store')
 api.add_resource(StoreItemResource, '/api/store/<int:id>')
@@ -627,11 +882,13 @@ api.add_resource(AdminUserCreateResource, '/api/admin/user/create')
 api.add_resource(AdminUserItemResource, '/api/admin/user/<int:id>')
 api.add_resource(AdminUserEditResource, '/api/admin/editUser/<int:id>')
 
-# Products
+# Products & Store Catalog
 api.add_resource(ProductListResource, '/api/product')
 api.add_resource(ProductCreateResource, '/api/product/create')
 api.add_resource(ProductItemResource, '/api/product/<int:id>')
 api.add_resource(ProductUpdateResource, '/api/product/update/<int:id>')
+api.add_resource(StoreProductCatalogResource, '/api/store/products')
+api.add_resource(StoreProductItemResource, '/api/store/product/<int:product_id>')
 
 # Suppliers
 api.add_resource(SupplierListResource, '/api/supplier')
@@ -641,6 +898,10 @@ api.add_resource(SupplierCreateResource, '/api/supplier/create')
 api.add_resource(TransactionListResource, '/api/transactions')
 api.add_resource(TransactionItemResource, '/api/transaction/<int:id>')
 api.add_resource(TransactionCreateResource, '/api/transaction/create')
+
+# Stock Requests Workflow (Toko -> Cabang)
+api.add_resource(StockRequestResource, '/api/stock/requests')
+api.add_resource(StockRequestStatusResource, '/api/stock/request/<int:id>/status')
 
 # Warehouse
 api.add_resource(WarehouseListResource, '/api/warehouse/store')

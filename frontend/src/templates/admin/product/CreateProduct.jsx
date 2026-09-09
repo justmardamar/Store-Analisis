@@ -52,8 +52,8 @@ export default function CreateProduct() {
                 {/* Header */}
                 <div className="mb-6 flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Tambah Produk Baru</h1>
-                        <p className="mt-1 text-sm text-slate-500">Masukkan rincian item baru ke dalam inventaris toko.</p>
+                        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Tambah Master Produk Baru</h1>
+                        <p className="mt-1 text-sm text-slate-500">Buat item baru dalam katalog master global. (Akses: Super Admin)</p>
                     </div>
                     <Link
                         to="/admin/listProduct"

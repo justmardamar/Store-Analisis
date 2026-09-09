@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import axios from 'axios'
 
 export default function ListProduct() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [actionId, setActionId] = useState(null)
+  const [message, setMessage] = useState({ type: "", text: "" })
 
   const fetchData = async () => {
     try {
       setLoading(true)
-      const response = await axios.get('http://localhost:5000/api/product')
-      console.log('Fetched products:', response.data.products)
+      const response = await axios.get('http://localhost:5000/api/store/products')
       setProducts(response.data.products || [])
     } catch (error) {
       console.error('Error fetching products:', error)
@@ -24,6 +24,42 @@ export default function ListProduct() {
     fetchData()
   }, [])
 
+  const handleAddProductToStore = async (productId) => {
+    try {
+      setActionId(productId)
+      setMessage({ type: "", text: "" })
+      const response = await axios.post('http://localhost:5000/api/store/products', {
+        product_id: productId
+      })
+      if (response.status === 200) {
+        setMessage({ type: "success", text: "Produk berhasil ditambahkan ke katalog toko dengan stok 0!" })
+        fetchData()
+      }
+    } catch (error) {
+      console.error(error)
+      setMessage({ type: "error", text: "Gagal menambahkan produk ke katalog toko." })
+    } finally {
+      setActionId(null)
+    }
+  }
+
+  const handleRemoveProductFromStore = async (productId) => {
+    try {
+      setActionId(productId)
+      setMessage({ type: "", text: "" })
+      const response = await axios.delete(`http://localhost:5000/api/store/product/${productId}`)
+      if (response.status === 200) {
+        setMessage({ type: "success", text: "Produk berhasil dihapus dari katalog toko!" })
+        fetchData()
+      }
+    } catch (error) {
+      console.error(error)
+      setMessage({ type: "error", text: "Gagal menghapus produk dari katalog toko." })
+    } finally {
+      setActionId(null)
+    }
+  }
+
   const filteredProducts = products.filter(product =>
     product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -32,30 +68,25 @@ export default function ListProduct() {
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-6 sm:px-8 lg:px-10 lg:py-8">
       <div className="mx-auto max-w-6xl">
-        {/* Top Header & Actions */}
+        {/* Top Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Daftar Produk</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Katalog Produk Toko</h1>
               <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700 ring-1 ring-inset ring-teal-600/20">
-                {products.length} Produk
+                {products.filter(p => p.is_in_store).length} Aktif di Toko
               </span>
             </div>
-            <p className="mt-1 text-sm text-slate-500">Kelola dan pantau seluruh stok serta katalog produk toko Anda.</p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              to="/admin/createProduct"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-100"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-              Tambah Produk
-            </Link>
+            <p className="mt-1 text-sm text-slate-500">Pilih produk dari katalog master global untuk dijual di toko Anda (Stok awal = 0).</p>
           </div>
         </div>
+
+        {/* Alert Feedback */}
+        {message.text && (
+          <div className={`mb-5 rounded-xl p-4 text-sm font-medium border ${message.type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200'}`}>
+            {message.text}
+          </div>
+        )}
 
         {/* Search Filter Bar */}
         <div className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -96,36 +127,21 @@ export default function ListProduct() {
                   <th className="px-6 py-3.5">Nama Produk</th>
                   <th className="px-6 py-3.5">Harga</th>
                   <th className="px-6 py-3.5">Kategori</th>
-                  <th className="px-6 py-3.5 text-right">Status</th>
+                  <th className="px-6 py-3.5 text-center">Stok Toko</th>
+                  <th className="px-6 py-3.5 text-center">Aksi Katalog Toko</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {loading ? (
                   <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center text-slate-400">
-                      <div className="inline-flex items-center gap-2">
-                        <svg className="h-5 w-5 animate-spin text-teal-600" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span>Memuat data produk...</span>
-                      </div>
+                    <td colSpan="6" className="px-6 py-12 text-center text-slate-400">
+                      Memuat katalog produk master...
                     </td>
                   </tr>
                 ) : filteredProducts.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
-                      <div className="mx-auto flex max-w-xs flex-col items-center justify-center">
-                        <div className="mb-3 rounded-full bg-slate-100 p-3 text-slate-400">
-                          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-                          </svg>
-                        </div>
-                        <p className="text-sm font-semibold text-slate-700">Tidak ada produk</p>
-                        <p className="mt-1 text-xs text-slate-400">
-                          {searchTerm ? 'Tidak ditemukan produk yang cocok dengan pencarian Anda.' : 'Belum ada produk yang ditambahkan.'}
-                        </p>
-                      </div>
+                    <td colSpan="6" className="px-6 py-12 text-center text-slate-500">
+                      Belum ada produk master tersedia.
                     </td>
                   </tr>
                 ) : (
@@ -145,17 +161,32 @@ export default function ListProduct() {
                           {product.category || 'Umum'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        {product.status ? (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                            Tersedia
-                          </span>
+                      <td className="px-6 py-4 text-center font-semibold text-slate-900">
+                        {product.is_in_store ? `${product.stock_quantity} Pcs` : '-'}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        {product.is_in_store ? (
+                          <button
+                            onClick={() => handleRemoveProductFromStore(product.id)}
+                            disabled={actionId === product.id}
+                            className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition disabled:opacity-50"
+                          >
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                            </svg>
+                            Hapus dari Toko
+                          </button>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-rose-600">
-                            <span className="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
-                            TidakTersedia
-                          </span>
+                          <button
+                            onClick={() => handleAddProductToStore(product.id)}
+                            disabled={actionId === product.id}
+                            className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-semibold text-white bg-teal-700 hover:bg-teal-800 transition disabled:opacity-50"
+                          >
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            + Tambah ke Toko (Stok 0)
+                          </button>
                         )}
                       </td>
                     </tr>
@@ -163,12 +194,6 @@ export default function ListProduct() {
                 )}
               </tbody>
             </table>
-          </div>
-
-          {/* Table Footer */}
-          <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50/50 px-6 py-3 text-xs text-slate-500">
-            <span>Menampilkan {filteredProducts.length} dari {products.length} produk</span>
-            <span>Update Terakhir: Ready</span>
           </div>
         </div>
       </div>
